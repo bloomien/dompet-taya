@@ -1,0 +1,1920 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dompet Tayaa — Keluar Masuk Dana</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans untuk tipografi modern & bersih -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Chart.js via CDN untuk visualisasi Donut Chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .fade-in {
+      animation: fadeIn 0.22s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+
+  <!-- ================= HEADER / NAVBAR ================= -->
+  <header class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-3">
+      <!-- Brand Logo & Title -->
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-600 to-indigo-700 flex items-center justify-center text-white shadow-sm shadow-brand-500/20 shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 truncate">Dompet Tayaa</h1>
+            <!-- Status Indikator Cloud Sync (Klik untuk mengatur sinkronisasi HP & Laptop) -->
+            <button id="btnHeaderSyncStatus" type="button"
+              class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600 hover:bg-brand-50 hover:text-brand-700 border border-slate-200 transition cursor-pointer">
+              <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
+              <span id="syncStatusText">Lokal (Setup Sync)</span>
+            </button>
+          </div>
+          <p class="text-[11px] sm:text-xs text-slate-500 truncate">Keluar Masuk Dana &bull; Auto-Sync HP &amp; Laptop</p>
+        </div>
+      </div>
+
+      <!-- Filter Bulan & Aksi Cepat -->
+      <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+        <!-- Pemilih Periode Bulan -->
+        <div class="flex items-center bg-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-200/70">
+          <label for="monthFilter" class="text-xs font-medium text-slate-500 mr-1.5 hidden md:inline">Periode:</label>
+          <select id="monthFilter" class="bg-transparent text-xs sm:text-sm font-semibold text-slate-700 focus:outline-none cursor-pointer">
+            <option value="CURRENT_MONTH">Bulan Ini</option>
+            <option value="ALL">Semua Waktu</option>
+          </select>
+        </div>
+
+        <!-- Tombol Cloud Sync (HP & Laptop) -->
+        <button id="btnOpenSyncModal" type="button" title="Pengaturan Auto-Sync HP & Laptop"
+          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+          </svg>
+          <span class="hidden sm:inline">Sinkron HP &amp; Laptop</span>
+        </button>
+
+        <!-- Tombol Data Contoh -->
+        <button id="btnSampleData" type="button" title="Muat contoh transaksi"
+          class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200/80 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <span class="hidden lg:inline">Data Contoh</span>
+        </button>
+
+        <!-- Tombol Reset Data -->
+        <button id="btnOpenResetModal" type="button" title="Reset Seluruh Data"
+          class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200/70 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          <span class="hidden md:inline">Reset</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+
+    <!-- 1. INDIKATOR PERINGATAN KEUANGAN (HEALTH CHECKS / FLAGS) -->
+    <section aria-label="Indikator Kesehatan Keuangan">
+      <div id="healthBanner" class="rounded-2xl border p-4 sm:p-5 transition-all duration-300 bg-white border-slate-200 shadow-sm">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <!-- Status Utama & Insight Satu Baris -->
+          <div class="flex items-start sm:items-center gap-3.5">
+            <div id="healthIconBadge" class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0 bg-slate-100">
+              💡
+            </div>
+            <div class="space-y-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Status Dompet Tayaa</span>
+                <span id="healthBadgePill" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700">
+                  Menunggu Data
+                </span>
+              </div>
+              <p id="healthInsightText" class="text-sm sm:text-base font-semibold text-slate-800">
+                Belum ada transaksi tercatat. Tambahkan pemasukan atau pengeluaran pertama untuk melihat analisis otomatis.
+              </p>
+            </div>
+          </div>
+
+          <!-- Sistem Lampu Indikator & Detail Flag Aktif -->
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100 shrink-0">
+            <div id="lampHealthy" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition opacity-40 bg-slate-50 border-slate-200 text-slate-500">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span>✅ Sehat (&lt;70%)</span>
+            </div>
+            <div id="lampWarning" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition opacity-40 bg-slate-50 border-slate-200 text-slate-500">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+              <span>⚠️ Waspada (Jajan &gt;30% / Saldo Tipis)</span>
+            </div>
+            <div id="lampDanger" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition opacity-40 bg-slate-50 border-slate-200 text-slate-500">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+              <span>🚨 Bahaya (&gt;85% / Defisit)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Baris Sub-Flags -->
+        <div id="activeFlagsList" class="mt-3 pt-3 border-t border-slate-200/60 hidden flex-wrap gap-2"></div>
+      </div>
+    </section>
+
+    <!-- 2. KARTU RINGKASAN & METRIK KEUANGAN (SUMMARY CARDS) -->
+    <section aria-label="Ringkasan Metrik Keuangan" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Card 1: Total Saldo Saat Ini -->
+      <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white rounded-2xl p-5 shadow-sm relative overflow-hidden">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-300">Sisa Saldo Kas Saat Ini</span>
+          <span class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-indigo-300">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </span>
+        </div>
+        <div id="cardCurrentBalance" class="text-2xl sm:text-3xl font-extrabold tracking-tight">Rp 0</div>
+        <p id="cardBalanceSub" class="text-xs text-slate-300 mt-2">Total dana masuk dikurangi dana keluar</p>
+      </div>
+
+      <!-- Card 2: Total Pemasukan Bulan Ini -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <span id="labelIncomePeriod" class="text-xs font-semibold uppercase tracking-wider text-slate-500">Pemasukan Bulan Ini</span>
+          <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 11l5-5m0 0l5 5m-5-5v12" />
+            </svg>
+          </span>
+        </div>
+        <div id="cardMonthlyIncome" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-emerald-600">Rp 0</div>
+        <p id="cardIncomeCount" class="text-xs text-slate-400 mt-2">0 transaksi pemasukan</p>
+      </div>
+
+      <!-- Card 3: Total Pengeluaran Bulan Ini -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <span id="labelExpensePeriod" class="text-xs font-semibold uppercase tracking-wider text-slate-500">Pengeluaran Bulan Ini</span>
+          <span class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 13l-5 5m0 0l-5-5m5 5V6" />
+            </svg>
+          </span>
+        </div>
+        <div id="cardMonthlyExpense" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-rose-600">Rp 0</div>
+        <p id="cardExpenseCount" class="text-xs text-slate-400 mt-2">0 transaksi keluar</p>
+      </div>
+
+      <!-- Card 4: Rasio Tabungan, Investasi & Surplus -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Rasio Tabungan / Surplus</span>
+            <span class="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </span>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <div id="cardSavingsRatio" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">0%</div>
+            <span id="cardExpenseRatioText" class="text-xs font-medium text-slate-400">(Konsumsi 0%)</span>
+          </div>
+        </div>
+        <!-- Progress Bar Rasio Tabungan -->
+        <div class="mt-3">
+          <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div id="savingsProgressBar" class="h-full bg-brand-600 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+          <p id="cardSavingsSub" class="text-[11px] text-slate-400 mt-1.5">Nabung + Investasi + Sisa Kas: Rp 0</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. GRID UTAMA: FORM INPUT + VISUALISASI & RIWAYAT TRANSAKSI -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- KOLOM KIRI (5/12): FORM INPUT CEPAT + BREAKDOWN CHART -->
+      <div class="lg:col-span-5 space-y-6">
+
+        <!-- FORM INPUT TRANSAKSI -->
+        <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 sm:p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-base font-bold text-slate-900">Catat Keluar Masuk Dana</h2>
+              <p class="text-xs text-slate-500">Input cepat, otomatis tersimpan &amp; tersinkron</p>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600">Kilat ⚡</span>
+          </div>
+
+          <form id="transactionForm" class="space-y-4" novalidate>
+            <!-- 1. Toggle Tipe Transaksi: Pemasukan (+) vs Pengeluaran (-) -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">Tipe Transaksi</label>
+              <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl border border-slate-200/70">
+                <button type="button" id="btnTypeExpense" data-type="expense"
+                  class="py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all bg-rose-600 text-white shadow-sm">
+                  <span>Pengeluaran (-)</span>
+                </button>
+                <button type="button" id="btnTypeIncome" data-type="income"
+                  class="py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 hover:text-slate-900">
+                  <span>Pemasukan (+)</span>
+                </button>
+              </div>
+              <input type="hidden" id="inputType" value="expense" />
+            </div>
+
+            <!-- 2. Jumlah Nominal (Rp) dengan Auto-Format Mata Uang -->
+            <div>
+              <label for="inputAmountDisplay" class="block text-xs font-semibold text-slate-600 mb-1.5">Jumlah Nominal (Rp)</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-sm font-bold text-slate-400 pointer-events-none">
+                  Rp
+                </span>
+                <input
+                  type="text"
+                  id="inputAmountDisplay"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  placeholder="0"
+                  required
+                  class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white text-base sm:text-lg font-bold text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition"
+                />
+              </div>
+              <!-- Tombol Nominal Cepat (Quick Chips) -->
+              <div class="flex flex-wrap gap-1.5 mt-2">
+                <button type="button" data-quick-amount="25000" class="quick-amount-btn text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition">+25rb</button>
+                <button type="button" data-quick-amount="50000" class="quick-amount-btn text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition">+50rb</button>
+                <button type="button" data-quick-amount="100000" class="quick-amount-btn text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition">+100rb</button>
+                <button type="button" data-quick-amount="500000" class="quick-amount-btn text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition">+500rb</button>
+                <button type="button" data-quick-amount="clear" class="quick-amount-btn text-[11px] font-semibold px-2 py-1 rounded-lg text-slate-400 hover:text-rose-600 transition ml-auto">Reset Rp</button>
+              </div>
+            </div>
+
+            <!-- 3. Kategori Singkat & Tanggal -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label for="inputCategory" class="block text-xs font-semibold text-slate-600 mb-1.5">Kategori Singkat</label>
+                <select
+                  id="inputCategory"
+                  required
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition cursor-pointer"
+                >
+                  <optgroup label="Pengeluaran (-)">
+                    <option value="Kebutuhan Pokok" selected>🍚 Kebutuhan Pokok</option>
+                    <option value="Jajan/Hiburan">☕ Jajan/Hiburan</option>
+                    <option value="Tagihan">⚡ Tagihan</option>
+                    <option value="Nabung">🏦 Nabung</option>
+                    <option value="Investasi">📈 Investasi</option>
+                    <option value="Lainnya">📦 Lainnya</option>
+                  </optgroup>
+                  <optgroup label="Pemasukan (+)">
+                    <option value="Gaji">💼 Gaji</option>
+                    <option value="Bisnis/Sampingan">🚀 Bisnis/Sampingan</option>
+                  </optgroup>
+                </select>
+              </div>
+
+              <div>
+                <label for="inputDate" class="block text-xs font-semibold text-slate-600 mb-1.5">Tanggal</label>
+                <input
+                  type="date"
+                  id="inputDate"
+                  required
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition cursor-pointer"
+                />
+              </div>
+            </div>
+
+            <!-- 4. Deskripsi / Catatan Singkat (Opsional) -->
+            <div>
+              <label for="inputDescription" class="block text-xs font-semibold text-slate-600 mb-1.5">
+                Deskripsi / Catatan Singkat <span class="text-slate-400 font-normal">(Opsional)</span>
+              </label>
+              <input
+                type="text"
+                id="inputDescription"
+                maxlength="80"
+                placeholder="Contoh: Makan siang, Tabungan emas, Reksadana, Gaji..."
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition"
+              />
+            </div>
+
+            <!-- Pesan Error Validasi Form -->
+            <p id="formErrorMsg" class="text-xs font-semibold text-rose-600 hidden"></p>
+
+            <!-- 5. Tombol Aksi: Tambah Transaksi -->
+            <button
+              type="submit"
+              id="btnSubmitTransaction"
+              class="w-full py-3 px-4 rounded-xl font-bold text-sm text-white bg-brand-600 hover:bg-brand-700 active:scale-[0.99] shadow-sm shadow-brand-500/20 transition flex items-center justify-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Tambah Transaksi</span>
+            </button>
+          </form>
+        </section>
+
+        <!-- VISUALISASI BREAKDOWN PENGELUARAN PER KATEGORI (DONUT CHART) -->
+        <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 sm:p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-base font-bold text-slate-900">Breakdown Pengeluaran &amp; Alokasi</h2>
+              <p class="text-xs text-slate-500">Proporsi dana keluar per kategori (termasuk Nabung &amp; Investasi)</p>
+            </div>
+            <span id="chartTotalBadge" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600">
+              Rp 0
+            </span>
+          </div>
+
+          <!-- Area Canvas Chart.js -->
+          <div id="chartContainer" class="relative h-56 flex items-center justify-center">
+            <canvas id="expenseDonutChart"></canvas>
+            <!-- Empty state ketika belum ada pengeluaran -->
+            <div id="chartEmptyState" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4 bg-white">
+              <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                </svg>
+              </div>
+              <p class="text-xs font-semibold text-slate-600">Belum ada data pengeluaran</p>
+              <p class="text-[11px] text-slate-400 mt-0.5">Diagram lingkaran akan tampil otomatis saat ada dana keluar.</p>
+            </div>
+          </div>
+
+          <!-- Daftar Rincian Persentase per Kategori -->
+          <div id="categoryBreakdownList" class="mt-4 pt-4 border-t border-slate-100 space-y-2.5"></div>
+        </section>
+
+      </div>
+
+      <!-- KOLOM KANAN (7/12): TABEL / DAFTAR RIWAYAT TRANSAKSI TERBARU -->
+      <div class="lg:col-span-7">
+        <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+          <!-- Header Tabel & Filter Riwayat -->
+          <div class="p-5 sm:p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-base font-bold text-slate-900">Riwayat Keluar Masuk Dana</h2>
+                <span id="txTotalBadge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">0</span>
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5">Catatan transaksi Dompet Tayaa</p>
+            </div>
+
+            <!-- Filter Tipe & Pencarian Singkat -->
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200/60">
+                <button type="button" data-filter-type="ALL" class="tx-type-filter px-2.5 py-1 rounded-lg text-xs font-semibold bg-white text-slate-800 shadow-sm transition">Semua</button>
+                <button type="button" data-filter-type="income" class="tx-type-filter px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition">Pemasukan</button>
+                <button type="button" data-filter-type="expense" class="tx-type-filter px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition">Pengeluaran</button>
+              </div>
+
+              <div class="relative flex-1 sm:w-44">
+                <input
+                  type="text"
+                  id="searchInput"
+                  placeholder="Cari catatan/kategori..."
+                  class="w-full pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50/70 focus:bg-white text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-brand-500 transition"
+                />
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabel Responsif -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-slate-100 bg-slate-50/60 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  <th class="py-3 pl-5 pr-3">Transaksi &amp; Kategori</th>
+                  <th class="py-3 px-3 hidden sm:table-cell">Tanggal</th>
+                  <th class="py-3 px-3 text-right">Nominal</th>
+                  <th class="py-3 pl-3 pr-5 text-right w-14">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="transactionTableBody" class="divide-y divide-slate-100 text-sm">
+                <!-- Diisi secara dinamis oleh JavaScript -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty State Riwayat Transaksi -->
+          <div id="txEmptyState" class="p-10 text-center hidden">
+            <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <p class="text-sm font-bold text-slate-700">Belum ada riwayat transaksi</p>
+            <p class="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
+              Gunakan formulir di sebelah kiri untuk mencatat dana masuk/keluar, atau hubungkan <strong>Sinkron HP &amp; Laptop</strong> di kanan atas.
+            </p>
+          </div>
+        </section>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-xs text-slate-400 border-t border-slate-200/60 mt-8">
+    <p>Dompet Tayaa — Keluar Masuk Dana &bull; Mendukung penyimpanan <code class="text-slate-500">localStorage</code> &amp; Cloud Auto-Sync (HP &leftrightarrow; Laptop).</p>
+  </footer>
+
+  <!-- ================= MODAL CLOUD AUTO-SYNC (HP & LAPTOP) ================= -->
+  <div id="syncModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-5 sm:p-6 shadow-xl border border-slate-200 fade-in my-8">
+      <!-- Header Modal -->
+      <div class="flex items-start justify-between gap-3 pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Auto-Sync Dompet Tayaa (HP &amp; Laptop)</h3>
+            <p class="text-xs text-slate-500">Sinkronkan keluar masuk dana otomatis antar perangkat</p>
+          </div>
+        </div>
+        <button type="button" id="btnCloseSyncModal" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Form Konfigurasi Cloud Sync -->
+      <div class="mt-4 space-y-4">
+        <!-- Pilihan Provider Cloud -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1.5">Metode Cloud Penyimpanan</label>
+          <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl border border-slate-200/70">
+            <button type="button" id="btnProviderFirebase" data-provider="firebase"
+              class="py-2 px-3 rounded-lg text-xs font-bold transition-all bg-white text-slate-900 shadow-sm">
+              🔥 Firebase Realtime DB
+            </button>
+            <button type="button" id="btnProviderGas" data-provider="gas"
+              class="py-2 px-3 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900">
+              📊 Google Sheets (Apps Script)
+            </button>
+          </div>
+          <input type="hidden" id="syncProviderInput" value="firebase" />
+        </div>
+
+        <!-- Input URL Endpoint Cloud -->
+        <div>
+          <label for="syncEndpointInput" id="labelSyncEndpoint" class="block text-xs font-semibold text-slate-600 mb-1">
+            URL Firebase Realtime Database
+          </label>
+          <input
+            type="url"
+            id="syncEndpointInput"
+            placeholder="https://dompet-tayaa-default-rtdb.asia-southeast1.firebasedatabase.app"
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white text-xs sm:text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition"
+          />
+          <p id="syncEndpointHelp" class="text-[11px] text-slate-400 mt-1">
+            Masukkan URL yang sama di HP dan di Laptop Anda.
+          </p>
+        </div>
+
+        <!-- Input Kode / PIN Sinkronisasi -->
+        <div>
+          <label for="syncRoomKeyInput" class="block text-xs font-semibold text-slate-600 mb-1">
+            Kode / PIN Sinkronisasi Pribadi (Bebas &amp; Unik)
+          </label>
+          <input
+            type="text"
+            id="syncRoomKeyInput"
+            placeholder="Contoh: tayaa-2026"
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white text-xs sm:text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition"
+          />
+          <p class="text-[11px] text-slate-400 mt-1">
+            Gunakan kode rahasia yang sama di HP dan Laptop agar kedua perangkat membaca data yang sama.
+          </p>
+        </div>
+
+        <!-- Kotak Panduan Setup Cepat (1 Menit) -->
+        <div class="rounded-xl bg-slate-50 border border-slate-200/80 p-3.5 text-xs space-y-2">
+          <div class="flex items-center justify-between">
+            <span id="guideTitle" class="font-bold text-slate-700">💡 Cara Dapat URL Firebase Gratis (1 Menit):</span>
+            <button type="button" id="btnCopyGasScript" class="hidden text-[11px] font-bold px-2.5 py-1 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition">
+              Salin Kode Apps Script
+            </button>
+          </div>
+          <ol id="guideStepsList" class="list-decimal list-inside space-y-1 text-slate-600 text-[11px] leading-relaxed">
+            <li>Buka <strong>console.firebase.google.com</strong> &rarr; klik <strong>Create a project</strong>.</li>
+            <li>Di menu kiri pilih <strong>Build &rarr; Realtime Database &rarr; Create Database</strong>.</li>
+            <li>Pilih lokasi server &rarr; pilih <strong>Start in test mode</strong> &rarr; salin link URL database (`https://...firebasedatabase.app`) ke kolom di atas.</li>
+          </ol>
+        </div>
+
+        <!-- Status & Pesan Sinkronisasi -->
+        <div id="syncModalFeedback" class="hidden rounded-xl px-3.5 py-2.5 text-xs font-semibold"></div>
+
+        <!-- Tombol Simpan & Sinkronkan Sekarang -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
+          <div class="flex items-center gap-2">
+            <button type="button" id="btnDisableSync"
+              class="px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 transition">
+              Matikan Sync
+            </button>
+            <button type="button" id="btnForcePull"
+              class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">
+              ⬇️ Tarik Data Cloud
+            </button>
+          </div>
+
+          <button type="button" id="btnSaveAndSync"
+            class="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 shadow-sm shadow-brand-500/20 transition flex items-center gap-1.5">
+            <span>☁️ Simpan &amp; Aktifkan Auto-Sync</span>
+          </button>
+        </div>
+
+        <!-- Cadangan Manual: Export / Import File JSON -->
+        <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span class="text-slate-500 font-medium">Pindah data manual (tanpa internet/cloud):</span>
+          <div class="flex items-center gap-2">
+            <button type="button" id="btnExportJson" class="px-2.5 py-1.5 rounded-lg font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+              📥 Export File (.json)
+            </button>
+            <label class="px-2.5 py-1.5 rounded-lg font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+              📤 Import File (.json)
+              <input type="file" id="inputImportJson" accept=".json,application/json" class="hidden" />
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL KONFIRMASI RESET DATA ================= -->
+  <div id="resetModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 fade-in">
+      <div class="flex items-center gap-3.5 mb-3">
+        <div class="w-11 h-11 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-slate-900">Hapus &amp; Reset Seluruh Data?</h3>
+          <p class="text-xs text-slate-500">Tindakan ini tidak dapat dibatalkan</p>
+        </div>
+      </div>
+
+      <p class="text-sm text-slate-600 leading-relaxed mb-6">
+        Seluruh catatan keluar masuk dana di Dompet Tayaa (serta di Cloud jika Auto-Sync aktif) akan dikosongkan. Yakin ingin mulai baru?
+      </p>
+
+      <div class="flex items-center justify-end gap-2.5">
+        <button type="button" id="btnCancelReset"
+          class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">
+          Batal
+        </button>
+        <button type="button" id="btnConfirmReset"
+          class="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 shadow-sm shadow-rose-500/20 transition">
+          Ya, Hapus Semua Data
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TOAST NOTIFICATION ================= -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 z-40 hidden items-center gap-2.5 px-4 py-3 rounded-xl bg-slate-900 text-white text-xs font-semibold shadow-lg">
+    <span id="toastIcon">✅</span>
+    <span id="toastMessage">Transaksi berhasil disimpan</span>
+  </div>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script>
+    /**
+     * ============================================================================
+     * DOMPET TAYAA — KELUAR MASUK DANA (SINGLE-FILE VANILLA JS + CLOUD AUTO-SYNC)
+     * ============================================================================
+     * Fitur Utama:
+     * 1. Penyimpanan otomatis ke localStorage ('dompet_tayaa_transactions_v1').
+     * 2. Cloud Auto-Sync dua arah (HP <-> Laptop) via Firebase Realtime DB / Google Sheets.
+     * 3. Kategori Pengeluaran mencakup: Kebutuhan Pokok, Jajan/Hiburan, Tagihan,
+     *    Nabung, Investasi, dan Lainnya.
+     * 4. Perhitungan Cerdas: Alokasi "Nabung" & "Investasi" tercatat sebagai dana keluar
+     *    dari kas aktif, namun dihitung sebagai tabungan/aset produktif pada Rasio Tabungan
+     *    & Indikator Kesehatan Keuangan (bukan pengeluaran konsumtif).
+     */
+
+    const STORAGE_KEY = 'dompet_tayaa_transactions_v1';
+    const STORAGE_META_KEY = 'dompet_tayaa_meta_v1';
+    const SYNC_CONFIG_KEY = 'dompet_tayaa_sync_config_v1';
+
+    // Kategori produktif (Tabungan & Investasi) di dalam Pengeluaran
+    const PRODUCTIVE_SAVING_CATEGORIES = ['Nabung', 'Investasi'];
+
+    // Template Kode Google Apps Script (Menyimpan ke Cloud + Menampilkan Tabel Rapi di Google Sheets)
+    const GAS_SCRIPT_TEMPLATE = `// Tempel kode ini di Google Sheets -> Ekstensi -> Apps Script
+// Lalu klik Terapkan (Deploy) -> Deployment baru -> Aplikasi Web (Akses: Siapa saja)
+
+function doGet(e) {
+  var key = (e.parameter && e.parameter.key) || 'default';
+  var props = PropertiesService.getScriptProperties();
+  var raw = props.getProperty('DOMPET_TAYAA_' + key);
+  var out = raw ? raw : JSON.stringify({ updatedAt: 0, transactions: [] });
+  return ContentService.createTextOutput(out).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var body = JSON.parse(e.postData.contents);
+  var key = body.key || 'default';
+  var txs = body.transactions || [];
+  var payload = { updatedAt: body.updatedAt || Date.now(), transactions: txs };
+
+  // 1. Simpan JSON untuk Auto-Sync cepat antara HP & Laptop
+  PropertiesService.getScriptProperties().setProperty('DOMPET_TAYAA_' + key, JSON.stringify(payload));
+
+  // 2. Tulis juga ke tabel Google Sheets secara otomatis agar mudah direkap
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (ss) {
+      var sheet = ss.getSheetByName('Dompet Tayaa') || ss.insertSheet('Dompet Tayaa');
+      sheet.clearContents();
+      sheet.appendRow(['Tanggal', 'Tipe', 'Kategori', 'Nominal (Rp)', 'Catatan / Deskripsi', 'ID Transaksi']);
+      for (var i = 0; i < txs.length; i++) {
+        var t = txs[i];
+        sheet.appendRow([
+          t.date || '',
+          t.type === 'income' ? 'Pemasukan (+)' : 'Pengeluaran (-)',
+          t.category || '',
+          Number(t.amount) || 0,
+          t.description || '-',
+          t.id || ''
+        ]);
+      }
+    }
+  } catch (err) {}
+
+  return ContentService.createTextOutput(JSON.stringify({ status: 'ok', updatedAt: payload.updatedAt }))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+
+    // Konfigurasi Metadata Kategori (Ikon & Warna Chart)
+    const CATEGORY_META = {
+      'Gaji':              { icon: '💼', color: '#10b981', badgeBg: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+      'Bisnis/Sampingan':  { icon: '🚀', color: '#14b8a6', badgeBg: 'bg-teal-50 text-teal-700 border-teal-200' },
+      'Kebutuhan Pokok':   { icon: '🍚', color: '#6366f1', badgeBg: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+      'Jajan/Hiburan':     { icon: '☕', color: '#f59e0b', badgeBg: 'bg-amber-50 text-amber-700 border-amber-200' },
+      'Tagihan':           { icon: '⚡', color: '#ec4899', badgeBg: 'bg-pink-50 text-pink-700 border-pink-200' },
+      'Nabung':            { icon: '🏦', color: '#0ea5e9', badgeBg: 'bg-sky-50 text-sky-700 border-sky-200' },
+      'Investasi':         { icon: '📈', color: '#8b5cf6', badgeBg: 'bg-violet-50 text-violet-700 border-violet-200' },
+      'Lainnya':           { icon: '📦', color: '#64748b', badgeBg: 'bg-slate-100 text-slate-700 border-slate-200' }
+    };
+
+    // State Aplikasi
+    let transactions = [];
+    let localUpdatedAt = 0;
+    let syncConfig = {
+      enabled: false,
+      provider: 'firebase', // 'firebase' | 'gas'
+      endpoint: '',
+      roomKey: ''
+    };
+    let isSyncing = false;
+    let syncPollTimer = null;
+
+    let activePeriodFilter = 'CURRENT_MONTH';
+    let activeTypeFilter = 'ALL';
+    let searchQuery = '';
+    let expenseChartInstance = null;
+    let toastTimer = null;
+
+    // Referensi Elemen DOM
+    const el = {
+      monthFilter: document.getElementById('monthFilter'),
+      btnSampleData: document.getElementById('btnSampleData'),
+      btnOpenResetModal: document.getElementById('btnOpenResetModal'),
+
+      // Header Cloud Sync Controls
+      btnHeaderSyncStatus: document.getElementById('btnHeaderSyncStatus'),
+      syncStatusDot: document.getElementById('syncStatusDot'),
+      syncStatusText: document.getElementById('syncStatusText'),
+      btnOpenSyncModal: document.getElementById('btnOpenSyncModal'),
+
+      // Modal Cloud Sync
+      syncModal: document.getElementById('syncModal'),
+      btnCloseSyncModal: document.getElementById('btnCloseSyncModal'),
+      btnProviderFirebase: document.getElementById('btnProviderFirebase'),
+      btnProviderGas: document.getElementById('btnProviderGas'),
+      syncProviderInput: document.getElementById('syncProviderInput'),
+      labelSyncEndpoint: document.getElementById('labelSyncEndpoint'),
+      syncEndpointInput: document.getElementById('syncEndpointInput'),
+      syncEndpointHelp: document.getElementById('syncEndpointHelp'),
+      syncRoomKeyInput: document.getElementById('syncRoomKeyInput'),
+      guideTitle: document.getElementById('guideTitle'),
+      guideStepsList: document.getElementById('guideStepsList'),
+      btnCopyGasScript: document.getElementById('btnCopyGasScript'),
+      syncModalFeedback: document.getElementById('syncModalFeedback'),
+      btnDisableSync: document.getElementById('btnDisableSync'),
+      btnForcePull: document.getElementById('btnForcePull'),
+      btnSaveAndSync: document.getElementById('btnSaveAndSync'),
+      btnExportJson: document.getElementById('btnExportJson'),
+      inputImportJson: document.getElementById('inputImportJson'),
+
+      // Health Banner
+      healthBanner: document.getElementById('healthBanner'),
+      healthIconBadge: document.getElementById('healthIconBadge'),
+      healthBadgePill: document.getElementById('healthBadgePill'),
+      healthInsightText: document.getElementById('healthInsightText'),
+      lampHealthy: document.getElementById('lampHealthy'),
+      lampWarning: document.getElementById('lampWarning'),
+      lampDanger: document.getElementById('lampDanger'),
+      activeFlagsList: document.getElementById('activeFlagsList'),
+
+      // Summary Cards
+      cardCurrentBalance: document.getElementById('cardCurrentBalance'),
+      cardBalanceSub: document.getElementById('cardBalanceSub'),
+      labelIncomePeriod: document.getElementById('labelIncomePeriod'),
+      cardMonthlyIncome: document.getElementById('cardMonthlyIncome'),
+      cardIncomeCount: document.getElementById('cardIncomeCount'),
+      labelExpensePeriod: document.getElementById('labelExpensePeriod'),
+      cardMonthlyExpense: document.getElementById('cardMonthlyExpense'),
+      cardExpenseCount: document.getElementById('cardExpenseCount'),
+      cardSavingsRatio: document.getElementById('cardSavingsRatio'),
+      cardExpenseRatioText: document.getElementById('cardExpenseRatioText'),
+      savingsProgressBar: document.getElementById('savingsProgressBar'),
+      cardSavingsSub: document.getElementById('cardSavingsSub'),
+
+      // Form Input
+      transactionForm: document.getElementById('transactionForm'),
+      btnTypeExpense: document.getElementById('btnTypeExpense'),
+      btnTypeIncome: document.getElementById('btnTypeIncome'),
+      inputType: document.getElementById('inputType'),
+      inputAmountDisplay: document.getElementById('inputAmountDisplay'),
+      inputCategory: document.getElementById('inputCategory'),
+      inputDate: document.getElementById('inputDate'),
+      inputDescription: document.getElementById('inputDescription'),
+      formErrorMsg: document.getElementById('formErrorMsg'),
+      btnSubmitTransaction: document.getElementById('btnSubmitTransaction'),
+
+      // Chart & Breakdown
+      chartTotalBadge: document.getElementById('chartTotalBadge'),
+      expenseDonutChart: document.getElementById('expenseDonutChart'),
+      chartEmptyState: document.getElementById('chartEmptyState'),
+      categoryBreakdownList: document.getElementById('categoryBreakdownList'),
+
+      // Tabel Riwayat
+      txTotalBadge: document.getElementById('txTotalBadge'),
+      searchInput: document.getElementById('searchInput'),
+      transactionTableBody: document.getElementById('transactionTableBody'),
+      txEmptyState: document.getElementById('txEmptyState'),
+
+      // Modal Reset & Toast
+      resetModal: document.getElementById('resetModal'),
+      btnCancelReset: document.getElementById('btnCancelReset'),
+      btnConfirmReset: document.getElementById('btnConfirmReset'),
+      toastNotification: document.getElementById('toastNotification'),
+      toastIcon: document.getElementById('toastIcon'),
+      toastMessage: document.getElementById('toastMessage')
+    };
+
+    // ============================================================================
+    // FUNGSI UTILITAS FORMAT & TANGGAL
+    // ============================================================================
+
+    function getTodayISO() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function getCurrentYearMonth() {
+      return getTodayISO().slice(0, 7);
+    }
+
+    function formatRupiah(amount, withPrefix = true) {
+      const num = Math.round(Number(amount) || 0);
+      const isNegative = num < 0;
+      const formatted = Math.abs(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      if (!withPrefix) return isNegative ? `-${formatted}` : formatted;
+      return isNegative ? `-Rp ${formatted}` : `Rp ${formatted}`;
+    }
+
+    function parseRawDigits(value) {
+      const digits = String(value).replace(/\D/g, '');
+      return digits ? parseInt(digits, 10) : 0;
+    }
+
+    function formatDateIndo(dateStr) {
+      if (!dateStr) return '-';
+      const parts = dateStr.split('-');
+      if (parts.length !== 3) return dateStr;
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      const year = parts[0];
+      const monthIdx = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      return `${day} ${months[monthIdx] || parts[1]} ${year}`;
+    }
+
+    function formatYearMonthIndo(ym) {
+      const [year, month] = ym.split('-');
+      const monthsFull = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      return `${monthsFull[parseInt(month, 10) - 1] || month} ${year}`;
+    }
+
+    function showToast(message, icon = '✅') {
+      if (toastTimer) clearTimeout(toastTimer);
+      el.toastIcon.textContent = icon;
+      el.toastMessage.textContent = message;
+      el.toastNotification.classList.remove('hidden');
+      el.toastNotification.classList.add('flex', 'fade-in');
+      toastTimer = setTimeout(() => {
+        el.toastNotification.classList.add('hidden');
+        el.toastNotification.classList.remove('flex');
+      }, 2600);
+    }
+
+    // ============================================================================
+    // PENYIMPANAN LOCALSTORAGE & CLOUD AUTO-SYNC ENGINE
+    // ============================================================================
+
+    function loadFromStorage() {
+      try {
+        // Fallback baca data lama jika pengguna pernah pakai versi sebelumnya
+        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('dompetku_transactions_v1');
+        transactions = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(transactions)) transactions = [];
+
+        const metaRaw = localStorage.getItem(STORAGE_META_KEY);
+        const meta = metaRaw ? JSON.parse(metaRaw) : {};
+        localUpdatedAt = Number(meta.updatedAt) || 0;
+
+        const syncRaw = localStorage.getItem(SYNC_CONFIG_KEY);
+        if (syncRaw) {
+          syncConfig = { ...syncConfig, ...JSON.parse(syncRaw) };
+        }
+      } catch (err) {
+        console.error('Gagal membaca LocalStorage:', err);
+        transactions = [];
+      }
+    }
+
+    function saveToStorage(touchTimestamp = true) {
+      try {
+        if (touchTimestamp) {
+          localUpdatedAt = Date.now();
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+        localStorage.setItem(STORAGE_META_KEY, JSON.stringify({ updatedAt: localUpdatedAt }));
+      } catch (err) {
+        console.error('Gagal menyimpan ke LocalStorage:', err);
+      }
+    }
+
+    function saveSyncConfig() {
+      localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(syncConfig));
+      updateSyncHeaderIndicator();
+    }
+
+    function updateSyncHeaderIndicator(state = null) {
+      if (!syncConfig.enabled || !syncConfig.endpoint || !syncConfig.roomKey) {
+        el.syncStatusDot.className = 'w-2 h-2 rounded-full bg-slate-400';
+        el.syncStatusText.textContent = 'Lokal (Klik untuk Sync)';
+        return;
+      }
+
+      if (state === 'syncing') {
+        el.syncStatusDot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-pulse';
+        el.syncStatusText.textContent = 'Menyinkronkan...';
+      } else if (state === 'error') {
+        el.syncStatusDot.className = 'w-2 h-2 rounded-full bg-rose-500';
+        el.syncStatusText.textContent = 'Sync Gagal (Cek URL)';
+      } else {
+        el.syncStatusDot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+        el.syncStatusText.textContent = `Auto-Sync: ${syncConfig.roomKey}`;
+      }
+    }
+
+    /** Mengirim (Push) data transaksi saat ini ke Cloud */
+    async function pushToCloud(silent = true) {
+      if (!syncConfig.enabled || !syncConfig.endpoint || !syncConfig.roomKey) return false;
+      isSyncing = true;
+      updateSyncHeaderIndicator('syncing');
+
+      try {
+        const cleanKey = syncConfig.roomKey.trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+        const payload = {
+          updatedAt: localUpdatedAt || Date.now(),
+          transactions: transactions
+        };
+
+        if (syncConfig.provider === 'firebase') {
+          const baseUrl = syncConfig.endpoint.trim().replace(/\/+$/, '');
+          const url = `${baseUrl}/dompet_tayaa_sync/${encodeURIComponent(cleanKey)}.json`;
+          const res = await fetch(url, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        } else {
+          const res = await fetch(syncConfig.endpoint.trim(), {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ key: cleanKey, ...payload })
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        }
+
+        isSyncing = false;
+        updateSyncHeaderIndicator('ok');
+        if (!silent) showToast('Data berhasil disinkronkan ke Cloud!', '☁️');
+        return true;
+      } catch (err) {
+        console.error('Push Cloud gagal:', err);
+        isSyncing = false;
+        updateSyncHeaderIndicator('error');
+        if (!silent) showToast('Gagal mengirim ke Cloud. Periksa URL/koneksi.', '⚠️');
+        return false;
+      }
+    }
+
+    /** Menarik (Pull) data dari Cloud dan menyinkronkannya dengan perangkat lokal */
+    async function pullFromCloud(forceOverwriteLocal = false, silent = true) {
+      if (!syncConfig.enabled || !syncConfig.endpoint || !syncConfig.roomKey || isSyncing) return false;
+      isSyncing = true;
+      updateSyncHeaderIndicator('syncing');
+
+      try {
+        const cleanKey = syncConfig.roomKey.trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+        let remoteData = null;
+
+        if (syncConfig.provider === 'firebase') {
+          const baseUrl = syncConfig.endpoint.trim().replace(/\/+$/, '');
+          const url = `${baseUrl}/dompet_tayaa_sync/${encodeURIComponent(cleanKey)}.json`;
+          const res = await fetch(url, { cache: 'no-store' });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          remoteData = await res.json();
+        } else {
+          const sep = syncConfig.endpoint.includes('?') ? '&' : '?';
+          const url = `${syncConfig.endpoint.trim()}${sep}key=${encodeURIComponent(cleanKey)}&_t=${Date.now()}`;
+          const res = await fetch(url, { cache: 'no-store' });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          remoteData = await res.json();
+        }
+
+        isSyncing = false;
+
+        if (!remoteData || !Array.isArray(remoteData.transactions)) {
+          if (transactions.length > 0) {
+            await pushToCloud(true);
+          } else {
+            updateSyncHeaderIndicator('ok');
+          }
+          return true;
+        }
+
+        const remoteUpdatedAt = Number(remoteData.updatedAt) || 0;
+
+        if (forceOverwriteLocal || remoteUpdatedAt > localUpdatedAt) {
+          transactions = remoteData.transactions;
+          localUpdatedAt = remoteUpdatedAt || Date.now();
+          saveToStorage(false);
+          renderDashboard();
+          if (!silent) showToast('Data terbaru dari Cloud berhasil dimuat!', '☁️');
+        } else if (localUpdatedAt > remoteUpdatedAt) {
+          await pushToCloud(true);
+        }
+
+        updateSyncHeaderIndicator('ok');
+        return true;
+      } catch (err) {
+        console.error('Pull Cloud gagal:', err);
+        isSyncing = false;
+        updateSyncHeaderIndicator('error');
+        if (!silent) showToast('Gagal menarik data Cloud. Pastikan URL benar.', '⚠️');
+        return false;
+      }
+    }
+
+    function startAutoSyncTimer() {
+      if (syncPollTimer) clearInterval(syncPollTimer);
+      if (syncConfig.enabled && syncConfig.endpoint && syncConfig.roomKey) {
+        syncPollTimer = setInterval(() => {
+          if (!document.hidden) {
+            pullFromCloud(false, true);
+          }
+        }, 20000);
+      }
+    }
+
+    // ============================================================================
+    // PENGELOLAAN FORM INPUT & TIPE TRANSAKSI
+    // ============================================================================
+
+    function setTransactionType(type) {
+      el.inputType.value = type;
+      if (type === 'income') {
+        el.btnTypeIncome.className = 'py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all bg-emerald-600 text-white shadow-sm';
+        el.btnTypeExpense.className = 'py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 hover:text-slate-900';
+        if (!['Gaji', 'Bisnis/Sampingan', 'Lainnya'].includes(el.inputCategory.value)) {
+          el.inputCategory.value = 'Gaji';
+        }
+      } else {
+        el.btnTypeExpense.className = 'py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all bg-rose-600 text-white shadow-sm';
+        el.btnTypeIncome.className = 'py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all text-slate-600 hover:text-slate-900';
+        if (['Gaji', 'Bisnis/Sampingan'].includes(el.inputCategory.value)) {
+          el.inputCategory.value = 'Kebutuhan Pokok';
+        }
+      }
+    }
+
+    // ============================================================================
+    // FILTER PERIODE & KALKULASI METRIK
+    // ============================================================================
+
+    function updateMonthDropdownOptions() {
+      const currentYM = getCurrentYearMonth();
+      const monthsSet = new Set([currentYM]);
+      transactions.forEach(tx => {
+        if (tx.date && tx.date.length >= 7) {
+          monthsSet.add(tx.date.slice(0, 7));
+        }
+      });
+
+      const sortedMonths = Array.from(monthsSet).sort().reverse();
+      const prevValue = el.monthFilter.value || 'CURRENT_MONTH';
+
+      el.monthFilter.innerHTML = `
+        <option value="CURRENT_MONTH">Bulan Ini (${formatYearMonthIndo(currentYM)})</option>
+        <option value="ALL">Semua Waktu</option>
+      `;
+
+      sortedMonths.forEach(ym => {
+        if (ym !== currentYM) {
+          const opt = document.createElement('option');
+          opt.value = ym;
+          opt.textContent = formatYearMonthIndo(ym);
+          el.monthFilter.appendChild(opt);
+        }
+      });
+
+      const optionExists = Array.from(el.monthFilter.options).some(o => o.value === prevValue);
+      el.monthFilter.value = optionExists ? prevValue : 'CURRENT_MONTH';
+      activePeriodFilter = el.monthFilter.value;
+    }
+
+    function getPeriodTransactions() {
+      const currentYM = getCurrentYearMonth();
+      if (activePeriodFilter === 'ALL') {
+        return [...transactions];
+      }
+      const targetYM = activePeriodFilter === 'CURRENT_MONTH' ? currentYM : activePeriodFilter;
+      return transactions.filter(tx => (tx.date || '').startsWith(targetYM));
+    }
+
+    // ============================================================================
+    // LOGIKA INDIKATOR PERINGATAN KEUANGAN (HEALTH CHECKS / FLAGS)
+    // ============================================================================
+
+    /**
+     * Mengevaluasi kesehatan keuangan:
+     * - Pengeluaran konsumtif/rutin (di luar Nabung & Investasi) digunakan untuk menguji Red Flag (>85%).
+     * - Alokasi ke Nabung & Investasi diapresiasi sebagai aset/tabungan produktif.
+     */
+    function evaluateFinancialHealth(periodIncome, periodTotalOutflow, consumptionExpense, savingInvestOutflow, jajanExpense, totalBalance) {
+      const dimClass = 'flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition opacity-40 bg-slate-50 border-slate-200 text-slate-500';
+      el.lampHealthy.className = dimClass;
+      el.lampWarning.className = dimClass;
+      el.lampDanger.className = dimClass;
+      el.activeFlagsList.innerHTML = '';
+      el.activeFlagsList.classList.add('hidden');
+      el.activeFlagsList.classList.remove('flex');
+
+      if (periodIncome === 0 && periodTotalOutflow === 0) {
+        el.healthBanner.className = 'rounded-2xl border p-4 sm:p-5 transition-all duration-300 bg-white border-slate-200 shadow-sm';
+        el.healthIconBadge.className = 'w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0 bg-slate-100';
+        el.healthIconBadge.textContent = '💡';
+        el.healthBadgePill.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700';
+        el.healthBadgePill.textContent = 'Menunggu Data';
+        el.healthInsightText.textContent = 'Belum ada transaksi pada periode ini. Catat dana masuk dan keluar untuk mengaktifkan indikator kesehatan Dompet Tayaa.';
+        return;
+      }
+
+      // Rasio pengeluaran konsumsi terhadap pemasukan
+      const consumptionRatio = periodIncome > 0 ? (consumptionExpense / periodIncome) * 100 : (consumptionExpense > 0 ? 100 : 0);
+      // Persentase Jajan/Hiburan terhadap pengeluaran konsumsi
+      const jajanRatioOfExpense = consumptionExpense > 0 ? (jajanExpense / consumptionExpense) * 100 : 0;
+
+      const isDeficit = periodTotalOutflow > periodIncome;
+      const isHighExpenseRatio = periodIncome > 0 && consumptionRatio > 85;
+      const isHighJajan = consumptionExpense > 0 && jajanRatioOfExpense > 30;
+      const isLowBalance = (periodIncome > 0 && consumptionRatio >= 70 && consumptionRatio <= 85) || (totalBalance > 0 && totalBalance < 150000);
+
+      const flagChips = [];
+      if (isDeficit) {
+        flagChips.push({
+          type: 'danger',
+          text: `🚨 Defisit Kas: Total dana keluar melebihi pemasukan sebesar ${formatRupiah(periodTotalOutflow - periodIncome)}`
+        });
+      } else if (isHighExpenseRatio) {
+        flagChips.push({
+          type: 'danger',
+          text: `🚨 Pengeluaran Konsumsi Kritis: Sudah mencapai ${consumptionRatio.toFixed(1)}% dari pemasukan (>85%)`
+        });
+      }
+
+      if (isHighJajan) {
+        flagChips.push({
+          type: 'warning',
+          text: `⚠️ Jajan/Hiburan Tinggi: ${jajanRatioOfExpense.toFixed(1)}% dari pengeluaran konsumsi (${formatRupiah(jajanExpense)})`
+        });
+      }
+
+      if (!isDeficit && !isHighExpenseRatio && isLowBalance) {
+        flagChips.push({
+          type: 'warning',
+          text: `⚠️ Ruang Anggaran Menipis: Konsumsi sudah memakai ${consumptionRatio.toFixed(1)}% pemasukan`
+        });
+      }
+
+      if (savingInvestOutflow > 0) {
+        flagChips.push({
+          type: 'healthy',
+          text: `🏦 Nabung & Investasi Terkumpul: ${formatRupiah(savingInvestOutflow)}`
+        });
+      }
+
+      if (isDeficit || isHighExpenseRatio) {
+        el.healthBanner.className = 'rounded-2xl border p-4 sm:p-5 transition-all duration-300 bg-rose-50/70 border-rose-200 shadow-sm';
+        el.healthIconBadge.className = 'w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0 bg-rose-100 text-rose-700';
+        el.healthIconBadge.textContent = '🚨';
+        el.healthBadgePill.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-600 text-white';
+        el.healthBadgePill.textContent = 'Red Flag • Bahaya';
+        el.lampDanger.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition bg-rose-100 border-rose-300 text-rose-800 shadow-2xs';
+
+        if (isDeficit) {
+          el.healthInsightText.textContent = `Total dana keluar melampaui pemasukan sebesar ${formatRupiah(periodTotalOutflow - periodIncome)}. Rem pengeluaran non-esensial segera agar kas tidak minus.`;
+        } else {
+          el.healthInsightText.textContent = `Pengeluaran konsumsi sudah menyentuh ${consumptionRatio.toFixed(1)}% dari pemasukan. Batasi belanja konsumtif di sisa bulan ini.`;
+        }
+      } else if (isHighJajan || isLowBalance) {
+        el.healthBanner.className = 'rounded-2xl border p-4 sm:p-5 transition-all duration-300 bg-amber-50/70 border-amber-200 shadow-sm';
+        el.healthIconBadge.className = 'w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0 bg-amber-100 text-amber-700';
+        el.healthIconBadge.textContent = '⚠️';
+        el.healthBadgePill.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500 text-white';
+        el.healthBadgePill.textContent = 'Warning • Waspada';
+        el.lampWarning.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition bg-amber-100 border-amber-300 text-amber-900 shadow-2xs';
+
+        if (isHighJajan) {
+          el.healthInsightText.textContent = `Pos Jajan/Hiburan menyerap ${jajanRatioOfExpense.toFixed(1)}% dari pengeluaran konsumsi (>30%). Yuk kurangi jajan impulsif dan alihkan ke Nabung/Investasi!`;
+        } else {
+          el.healthInsightText.textContent = `Pengeluaran konsumsi berada di ${consumptionRatio.toFixed(1)}% dari pemasukan. Jaga sisa kas ${formatRupiah(periodIncome - periodTotalOutflow)} untuk kebutuhan penting.`;
+        }
+      } else {
+        el.healthBanner.className = 'rounded-2xl border p-4 sm:p-5 transition-all duration-300 bg-emerald-50/60 border-emerald-200 shadow-sm';
+        el.healthIconBadge.className = 'w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0 bg-emerald-100 text-emerald-700';
+        el.healthIconBadge.textContent = '✅';
+        el.healthBadgePill.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-600 text-white';
+        el.healthBadgePill.textContent = 'Healthy • Sehat';
+        el.lampHealthy.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition bg-emerald-100 border-emerald-300 text-emerald-900 shadow-2xs';
+
+        const totalSecured = (periodIncome - periodTotalOutflow) + savingInvestOutflow;
+        const securedPct = periodIncome > 0 ? ((totalSecured / periodIncome) * 100).toFixed(1) : 0;
+        el.healthInsightText.textContent = `Dompet Tayaa sangat sehat! Pengeluaran konsumsi terkendali di ${consumptionRatio.toFixed(1)}% — total dana diamankan (Nabung, Investasi & Sisa Kas) mencapai ${securedPct}% (${formatRupiah(totalSecured)}).`;
+        flagChips.unshift({
+          type: 'healthy',
+          text: `✅ Konsumsi Terkontrol (<70%): Baru terpakai ${consumptionRatio.toFixed(1)}% dari pemasukan`
+        });
+      }
+
+      if (flagChips.length > 0) {
+        el.activeFlagsList.classList.remove('hidden');
+        el.activeFlagsList.classList.add('flex');
+        flagChips.forEach(chip => {
+          const span = document.createElement('span');
+          const styleMap = {
+            danger: 'bg-rose-100/90 text-rose-800 border-rose-200',
+            warning: 'bg-amber-100/90 text-amber-900 border-amber-200',
+            healthy: 'bg-emerald-100/90 text-emerald-800 border-emerald-200'
+          };
+          span.className = `inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold border ${styleMap[chip.type]}`;
+          span.textContent = chip.text;
+          el.activeFlagsList.appendChild(span);
+        });
+      }
+    }
+
+    // ============================================================================
+    // VISUALISASI DONUT CHART (CHART.JS)
+    // ============================================================================
+
+    function renderExpenseChart(periodExpenses) {
+      const totalsByCategory = {};
+      let grandTotalExpense = 0;
+
+      periodExpenses.forEach(tx => {
+        const cat = tx.category || 'Lainnya';
+        totalsByCategory[cat] = (totalsByCategory[cat] || 0) + tx.amount;
+        grandTotalExpense += tx.amount;
+      });
+
+      el.chartTotalBadge.textContent = formatRupiah(grandTotalExpense);
+
+      const entries = Object.entries(totalsByCategory).sort((a, b) => b[1] - a[1]);
+
+      if (entries.length === 0 || grandTotalExpense === 0) {
+        el.chartEmptyState.classList.remove('hidden');
+        el.categoryBreakdownList.innerHTML = '';
+        if (expenseChartInstance) {
+          expenseChartInstance.destroy();
+          expenseChartInstance = null;
+        }
+        return;
+      }
+
+      el.chartEmptyState.classList.add('hidden');
+
+      const labels = entries.map(([cat]) => cat);
+      const dataValues = entries.map(([, total]) => total);
+      const bgColors = entries.map(([cat]) => (CATEGORY_META[cat]?.color || '#64748b'));
+
+      if (expenseChartInstance) {
+        expenseChartInstance.data.labels = labels;
+        expenseChartInstance.data.datasets[0].data = dataValues;
+        expenseChartInstance.data.datasets[0].backgroundColor = bgColors;
+        expenseChartInstance.update();
+      } else if (typeof Chart !== 'undefined') {
+        const ctx = el.expenseDonutChart.getContext('2d');
+        expenseChartInstance = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: labels,
+            datasets: [{
+              data: dataValues,
+              backgroundColor: bgColors,
+              borderWidth: 2,
+              borderColor: '#ffffff',
+              hoverOffset: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '66%',
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const val = context.raw || 0;
+                    const pct = grandTotalExpense > 0 ? ((val / grandTotalExpense) * 100).toFixed(1) : 0;
+                    return ` ${context.label}: ${formatRupiah(val)} (${pct}%)`;
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+
+      el.categoryBreakdownList.innerHTML = entries.map(([cat, amount]) => {
+        const pct = ((amount / grandTotalExpense) * 100).toFixed(1);
+        const meta = CATEGORY_META[cat] || CATEGORY_META['Lainnya'];
+        const isHighJajanCat = cat === 'Jajan/Hiburan' && parseFloat(pct) > 30;
+        const isProductiveCat = PRODUCTIVE_SAVING_CATEGORIES.includes(cat);
+        return `
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${meta.color}"></span>
+              <span class="font-semibold text-slate-700 truncate">${meta.icon} ${cat}</span>
+              ${isHighJajanCat ? '<span class="px-1.5 py-0.5 text-[10px] font-bold rounded bg-amber-100 text-amber-800">&gt;30%</span>' : ''}
+              ${isProductiveCat ? '<span class="px-1.5 py-0.5 text-[10px] font-bold rounded bg-sky-100 text-sky-800">Aset/Tabungan</span>' : ''}
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="font-bold text-slate-800">${formatRupiah(amount)}</span>
+              <span class="text-slate-400 font-medium w-12 text-right">(${pct}%)</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ============================================================================
+    // RENDER TABEL RIWAYAT TRANSAKSI
+    // ============================================================================
+
+    function renderTransactionTable(periodTransactions) {
+      const filtered = periodTransactions.filter(tx => {
+        const matchType = activeTypeFilter === 'ALL' || tx.type === activeTypeFilter;
+        const q = searchQuery.trim().toLowerCase();
+        const matchSearch = !q ||
+          (tx.description || '').toLowerCase().includes(q) ||
+          (tx.category || '').toLowerCase().includes(q);
+        return matchType && matchSearch;
+      });
+
+      filtered.sort((a, b) => {
+        if (b.date !== a.date) return b.date.localeCompare(a.date);
+        return (b.createdAt || 0) - (a.createdAt || 0);
+      });
+
+      el.txTotalBadge.textContent = `${filtered.length} item`;
+
+      if (filtered.length === 0) {
+        el.transactionTableBody.innerHTML = '';
+        el.txEmptyState.classList.remove('hidden');
+        return;
+      }
+
+      el.txEmptyState.classList.add('hidden');
+
+      el.transactionTableBody.innerHTML = filtered.map(tx => {
+        const isIncome = tx.type === 'income';
+        const isProductive = !isIncome && PRODUCTIVE_SAVING_CATEGORIES.includes(tx.category);
+        const meta = CATEGORY_META[tx.category] || CATEGORY_META['Lainnya'];
+        const title = tx.description ? escapeHTML(tx.description) : escapeHTML(tx.category);
+        const amountClass = isIncome ? 'text-emerald-600' : (isProductive ? 'text-sky-600' : 'text-rose-600');
+        const sign = isIncome ? '+' : '-';
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition group">
+            <td class="py-3.5 pl-5 pr-3">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-base shrink-0 border ${meta.badgeBg}">
+                  ${meta.icon}
+                </div>
+                <div class="min-w-0">
+                  <p class="font-bold text-slate-800 truncate">${title}</p>
+                  <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border ${meta.badgeBg}">
+                      ${escapeHTML(tx.category)}
+                    </span>
+                    <span class="text-[11px] text-slate-400 sm:hidden">&bull; ${formatDateIndo(tx.date)}</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td class="py-3.5 px-3 text-xs font-medium text-slate-500 hidden sm:table-cell whitespace-nowrap">
+              ${formatDateIndo(tx.date)}
+            </td>
+            <td class="py-3.5 px-3 text-right whitespace-nowrap">
+              <span class="font-extrabold ${amountClass}">${sign} ${formatRupiah(tx.amount)}</span>
+            </td>
+            <td class="py-3.5 pl-3 pr-5 text-right">
+              <button
+                type="button"
+                onclick="deleteTransaction('${tx.id}')"
+                title="Hapus transaksi ini"
+                class="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                aria-label="Hapus transaksi"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function escapeHTML(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // ============================================================================
+    // SINKRONISASI & RENDER UTAMA DASHBOARD
+    // ============================================================================
+
+    function renderDashboard() {
+      updateMonthDropdownOptions();
+
+      let allTimeIncome = 0;
+      let allTimeExpense = 0;
+      let allTimeSavedInvested = 0;
+      transactions.forEach(tx => {
+        if (tx.type === 'income') {
+          allTimeIncome += tx.amount;
+        } else {
+          allTimeExpense += tx.amount;
+          if (PRODUCTIVE_SAVING_CATEGORIES.includes(tx.category)) {
+            allTimeSavedInvested += tx.amount;
+          }
+        }
+      });
+      const currentBalance = allTimeIncome - allTimeExpense;
+
+      const periodTxs = getPeriodTransactions();
+      let periodIncome = 0;
+      let periodTotalOutflow = 0;
+      let consumptionExpense = 0;
+      let savingInvestOutflow = 0;
+      let incomeCount = 0;
+      let expenseCount = 0;
+      let jajanExpense = 0;
+      const periodExpensesList = [];
+
+      periodTxs.forEach(tx => {
+        if (tx.type === 'income') {
+          periodIncome += tx.amount;
+          incomeCount++;
+        } else {
+          periodTotalOutflow += tx.amount;
+          expenseCount++;
+          periodExpensesList.push(tx);
+
+          if (PRODUCTIVE_SAVING_CATEGORIES.includes(tx.category)) {
+            savingInvestOutflow += tx.amount;
+          } else {
+            consumptionExpense += tx.amount;
+          }
+
+          if (tx.category === 'Jajan/Hiburan') {
+            jajanExpense += tx.amount;
+          }
+        }
+      });
+
+      const isAllTime = activePeriodFilter === 'ALL';
+      const isCurrentMonth = activePeriodFilter === 'CURRENT_MONTH';
+      const periodSuffix = isAllTime ? 'Semua Waktu' : (isCurrentMonth ? 'Bulan Ini' : formatYearMonthIndo(activePeriodFilter));
+      el.labelIncomePeriod.textContent = `Pemasukan (${periodSuffix})`;
+      el.labelExpensePeriod.textContent = `Pengeluaran (${periodSuffix})`;
+
+      el.cardCurrentBalance.textContent = formatRupiah(currentBalance);
+      el.cardCurrentBalance.className = `text-2xl sm:text-3xl font-extrabold tracking-tight ${currentBalance < 0 ? 'text-rose-300' : 'text-white'}`;
+      el.cardBalanceSub.textContent = allTimeSavedInvested > 0
+        ? `Ditambah Nabung & Investasi: ${formatRupiah(allTimeSavedInvested)}`
+        : `Total dari ${transactions.length} transaksi tercatat`;
+
+      el.cardMonthlyIncome.textContent = formatRupiah(periodIncome);
+      el.cardIncomeCount.textContent = `${incomeCount} transaksi pemasukan`;
+
+      el.cardMonthlyExpense.textContent = formatRupiah(periodTotalOutflow);
+      el.cardExpenseCount.textContent = savingInvestOutflow > 0
+        ? `Konsumsi ${formatRupiah(consumptionExpense)} • Nabung/Inv ${formatRupiah(savingInvestOutflow)}`
+        : `${expenseCount} transaksi pengeluaran`;
+
+      // Kalkulasi Rasio Tabungan / Surplus: (Sisa Kas + Nabung + Investasi) / Pemasukan
+      const totalSecuredAmount = (periodIncome - periodTotalOutflow) + savingInvestOutflow;
+      let savingsRatio = 0;
+      let consumptionRatio = 0;
+
+      if (periodIncome > 0) {
+        savingsRatio = (totalSecuredAmount / periodIncome) * 100;
+        consumptionRatio = (consumptionExpense / periodIncome) * 100;
+      } else if (periodTotalOutflow > 0) {
+        savingsRatio = -100;
+        consumptionRatio = 100;
+      }
+
+      const formattedSavingsRatio = (periodIncome === 0 && periodTotalOutflow === 0)
+        ? '0%'
+        : `${savingsRatio.toFixed(1)}%`;
+
+      el.cardSavingsRatio.textContent = formattedSavingsRatio;
+      el.cardExpenseRatioText.textContent = `(Konsumsi ${consumptionRatio.toFixed(0)}%)`;
+
+      const clampedBarWidth = Math.max(0, Math.min(100, savingsRatio));
+      el.savingsProgressBar.style.width = `${clampedBarWidth}%`;
+      el.cardSavingsSub.textContent = `Nabung/Investasi ${formatRupiah(savingInvestOutflow)} + Sisa Kas ${formatRupiah(periodIncome - periodTotalOutflow)}`;
+
+      if (periodTotalOutflow > periodIncome || consumptionRatio > 85) {
+        el.cardSavingsRatio.className = 'text-2xl sm:text-3xl font-extrabold tracking-tight text-rose-600';
+        el.savingsProgressBar.className = 'h-full bg-rose-500 rounded-full transition-all duration-500';
+      } else if (savingsRatio < 30) {
+        el.cardSavingsRatio.className = 'text-2xl sm:text-3xl font-extrabold tracking-tight text-amber-600';
+        el.savingsProgressBar.className = 'h-full bg-amber-500 rounded-full transition-all duration-500';
+      } else {
+        el.cardSavingsRatio.className = 'text-2xl sm:text-3xl font-extrabold tracking-tight text-emerald-600';
+        el.savingsProgressBar.className = 'h-full bg-emerald-500 rounded-full transition-all duration-500';
+      }
+
+      evaluateFinancialHealth(
+        periodIncome,
+        periodTotalOutflow,
+        consumptionExpense,
+        savingInvestOutflow,
+        jajanExpense,
+        currentBalance
+      );
+      renderExpenseChart(periodExpensesList);
+      renderTransactionTable(periodTxs);
+    }
+
+    // ============================================================================
+    // AKSI CRUD TRANSAKSI (TAMBAH, HAPUS, SAMPLE DATA, RESET)
+    // ============================================================================
+
+    async function handleAddTransaction(event) {
+      event.preventDefault();
+      el.formErrorMsg.classList.add('hidden');
+
+      const type = el.inputType.value === 'income' ? 'income' : 'expense';
+      const amount = parseRawDigits(el.inputAmountDisplay.value);
+      const category = el.inputCategory.value;
+      const date = el.inputDate.value || getTodayISO();
+      const description = el.inputDescription.value.trim();
+
+      if (!amount || amount <= 0) {
+        el.formErrorMsg.textContent = 'Mohon masukkan jumlah nominal lebih dari Rp 0.';
+        el.formErrorMsg.classList.remove('hidden');
+        el.inputAmountDisplay.focus();
+        return;
+      }
+
+      const newTx = {
+        id: 'tx_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+        type,
+        amount,
+        category,
+        description,
+        date,
+        createdAt: Date.now()
+      };
+
+      transactions.unshift(newTx);
+      saveToStorage(true);
+
+      el.inputAmountDisplay.value = '';
+      el.inputDescription.value = '';
+
+      const txYM = date.slice(0, 7);
+      if (activePeriodFilter === 'CURRENT_MONTH' && txYM !== getCurrentYearMonth()) {
+        activePeriodFilter = txYM;
+        el.monthFilter.value = txYM;
+      }
+
+      renderDashboard();
+      showToast(`${category} (${formatRupiah(amount)}) berhasil dicatat!`);
+
+      if (syncConfig.enabled) {
+        await pushToCloud(true);
+      }
+    }
+
+    window.deleteTransaction = async function(id) {
+      const target = transactions.find(t => t.id === id);
+      if (!target) return;
+      transactions = transactions.filter(t => t.id !== id);
+      saveToStorage(true);
+      renderDashboard();
+      showToast(`Transaksi ${formatRupiah(target.amount)} dihapus`, '🗑️');
+
+      if (syncConfig.enabled) {
+        await pushToCloud(true);
+      }
+    };
+
+    async function loadSampleData() {
+      const ym = getCurrentYearMonth();
+      const sampleItems = [
+        { type: 'income',  amount: 8500000, category: 'Gaji',             description: 'Gaji bulanan',                   date: `${ym}-01` },
+        { type: 'income',  amount: 1500000, category: 'Bisnis/Sampingan', description: 'Bonus projek freelance',         date: `${ym}-05` },
+        { type: 'expense', amount: 2000000, category: 'Kebutuhan Pokok',  description: 'Belanja bulanan & makan harian', date: `${ym}-03` },
+        { type: 'expense', amount: 1500000, category: 'Nabung',           description: 'Tabungan dana darurat',          date: `${ym}-04` },
+        { type: 'expense', amount: 1000000, category: 'Investasi',        description: 'Beli Reksadana & Emas',          date: `${ym}-05` },
+        { type: 'expense', amount: 850000,  category: 'Tagihan',          description: 'Listrik, kuota internet & air',  date: `${ym}-07` },
+        { type: 'expense', amount: 650000,  category: 'Jajan/Hiburan',    description: 'Kopi, kuliner akhir pekan',      date: `${ym}-10` }
+      ];
+
+      const now = Date.now();
+      sampleItems.forEach((item, idx) => {
+        transactions.push({
+          id: 'sample_' + now + '_' + idx,
+          ...item,
+          createdAt: now + idx
+        });
+      });
+
+      activePeriodFilter = 'CURRENT_MONTH';
+      saveToStorage(true);
+      renderDashboard();
+      showToast('7 transaksi contoh (termasuk Nabung & Investasi) dimuat!', '⚡');
+
+      if (syncConfig.enabled) {
+        await pushToCloud(true);
+      }
+    }
+
+    // ============================================================================
+    // PENGATURAN UI MODAL CLOUD SYNC
+    // ============================================================================
+
+    function setSyncProviderUI(provider) {
+      el.syncProviderInput.value = provider;
+      if (provider === 'gas') {
+        el.btnProviderGas.className = 'py-2 px-3 rounded-lg text-xs font-bold transition-all bg-white text-slate-900 shadow-sm';
+        el.btnProviderFirebase.className = 'py-2 px-3 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900';
+        el.labelSyncEndpoint.textContent = 'URL Web App Google Apps Script';
+        el.syncEndpointInput.placeholder = 'https://script.google.com/macros/s/AKfycb.../exec';
+        el.guideTitle.textContent = '💡 Cara Pakai Google Sheets + Apps Script Gratis:';
+        el.btnCopyGasScript.classList.remove('hidden');
+        el.guideStepsList.innerHTML = `
+          <li>Klik tombol <strong>Salin Kode Apps Script</strong> di kanan atas kotak ini.</li>
+          <li>Buka <strong>Google Sheets</strong> baru &rarr; menu <strong>Ekstensi &rarr; Apps Script</strong> &rarr; tempel kode &rarr; klik <strong>Terapkan (Deploy) &rarr; Deployment baru</strong>.</li>
+          <li>Pilih jenis <strong>Aplikasi Web</strong>, akses: <strong>Siapa saja (Anyone)</strong>, lalu salin URL Web App ke kolom di atas.</li>
+        `;
+      } else {
+        el.btnProviderFirebase.className = 'py-2 px-3 rounded-lg text-xs font-bold transition-all bg-white text-slate-900 shadow-sm';
+        el.btnProviderGas.className = 'py-2 px-3 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900';
+        el.labelSyncEndpoint.textContent = 'URL Firebase Realtime Database';
+        el.syncEndpointInput.placeholder = 'https://dompet-tayaa-default-rtdb.asia-southeast1.firebasedatabase.app';
+        el.guideTitle.textContent = '💡 Cara Dapat URL Firebase Gratis (1 Menit):';
+        el.btnCopyGasScript.classList.add('hidden');
+        el.guideStepsList.innerHTML = `
+          <li>Buka <strong>console.firebase.google.com</strong> &rarr; klik <strong>Create a project</strong>.</li>
+          <li>Di menu kiri pilih <strong>Build &rarr; Realtime Database &rarr; Create Database</strong>.</li>
+          <li>Pilih <strong>Start in test mode</strong> &rarr; salin link URL database (<code>https://...firebasedatabase.app</code>) ke kolom di atas.</li>
+        `;
+      }
+    }
+
+    function openSyncModal() {
+      setSyncProviderUI(syncConfig.provider || 'firebase');
+      el.syncEndpointInput.value = syncConfig.endpoint || '';
+      el.syncRoomKeyInput.value = syncConfig.roomKey || '';
+      el.syncModalFeedback.classList.add('hidden');
+      el.syncModal.classList.remove('hidden');
+      el.syncModal.classList.add('flex');
+    }
+
+    function closeSyncModal() {
+      el.syncModal.classList.add('hidden');
+      el.syncModal.classList.remove('flex');
+    }
+
+    function showSyncModalFeedback(msg, isError = false) {
+      el.syncModalFeedback.textContent = msg;
+      el.syncModalFeedback.className = `rounded-xl px-3.5 py-2.5 text-xs font-semibold ${
+        isError ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+      }`;
+      el.syncModalFeedback.classList.remove('hidden');
+    }
+
+    // ============================================================================
+    // INISIALISASI EVENT LISTENERS
+    // ============================================================================
+
+    function initApp() {
+      el.inputDate.value = getTodayISO();
+
+      el.btnTypeExpense.addEventListener('click', () => setTransactionType('expense'));
+      el.btnTypeIncome.addEventListener('click', () => setTransactionType('income'));
+
+      el.inputAmountDisplay.addEventListener('input', (e) => {
+        const raw = parseRawDigits(e.target.value);
+        e.target.value = raw > 0 ? formatRupiah(raw, false) : '';
+        el.formErrorMsg.classList.add('hidden');
+      });
+
+      document.querySelectorAll('.quick-amount-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const val = btn.getAttribute('data-quick-amount');
+          if (val === 'clear') {
+            el.inputAmountDisplay.value = '';
+            return;
+          }
+          const current = parseRawDigits(el.inputAmountDisplay.value);
+          const next = current + parseInt(val, 10);
+          el.inputAmountDisplay.value = formatRupiah(next, false);
+          el.formErrorMsg.classList.add('hidden');
+        });
+      });
+
+      // Otomatis sesuaikan toggle Tipe saat memilih Kategori
+      el.inputCategory.addEventListener('change', () => {
+        const cat = el.inputCategory.value;
+        if (['Gaji', 'Bisnis/Sampingan'].includes(cat)) {
+          setTransactionType('income');
+        } else if (['Kebutuhan Pokok', 'Jajan/Hiburan', 'Tagihan', 'Nabung', 'Investasi'].includes(cat)) {
+          setTransactionType('expense');
+        }
+      });
+
+      el.transactionForm.addEventListener('submit', handleAddTransaction);
+
+      el.monthFilter.addEventListener('change', (e) => {
+        activePeriodFilter = e.target.value;
+        renderDashboard();
+      });
+
+      document.querySelectorAll('.tx-type-filter').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeTypeFilter = btn.getAttribute('data-filter-type');
+          document.querySelectorAll('.tx-type-filter').forEach(b => {
+            b.className = 'tx-type-filter px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition';
+          });
+          btn.className = 'tx-type-filter px-2.5 py-1 rounded-lg text-xs font-semibold bg-white text-slate-800 shadow-sm transition';
+          renderDashboard();
+        });
+      });
+
+      el.searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        renderTransactionTable(getPeriodTransactions());
+      });
+
+      el.btnSampleData.addEventListener('click', loadSampleData);
+
+      el.btnOpenSyncModal.addEventListener('click', openSyncModal);
+      el.btnHeaderSyncStatus.addEventListener('click', openSyncModal);
+      el.btnCloseSyncModal.addEventListener('click', closeSyncModal);
+      el.syncModal.addEventListener('click', (e) => {
+        if (e.target === el.syncModal) closeSyncModal();
+      });
+
+      el.btnProviderFirebase.addEventListener('click', () => setSyncProviderUI('firebase'));
+      el.btnProviderGas.addEventListener('click', () => setSyncProviderUI('gas'));
+
+      el.btnCopyGasScript.addEventListener('click', () => {
+        navigator.clipboard.writeText(GAS_SCRIPT_TEMPLATE).then(() => {
+          showToast('Kode Google Apps Script disalin ke clipboard!', '📋');
+        });
+      });
+
+      el.btnSaveAndSync.addEventListener('click', async () => {
+        const provider = el.syncProviderInput.value;
+        const endpoint = el.syncEndpointInput.value.trim();
+        const roomKey = el.syncRoomKeyInput.value.trim();
+
+        if (!endpoint || !endpoint.startsWith('https://')) {
+          showSyncModalFeedback('Masukkan URL Cloud yang valid (diawali https://).', true);
+          return;
+        }
+        if (!roomKey) {
+          showSyncModalFeedback('Masukkan Kode / PIN Sinkronisasi terlebih dahulu.', true);
+          return;
+        }
+
+        syncConfig = { enabled: true, provider, endpoint, roomKey };
+        saveSyncConfig();
+        showSyncModalFeedback('Menghubungkan & menyinkronkan data dengan Cloud...', false);
+
+        const ok = await pullFromCloud(false, false);
+        if (ok) {
+          startAutoSyncTimer();
+          showSyncModalFeedback('✅ Auto-Sync Aktif! Gunakan URL & Kode yang sama di HP dan Laptop Anda.', false);
+        } else {
+          showSyncModalFeedback('Gagal terhubung ke URL Cloud tersebut. Pastikan URL benar & akses publik/test mode aktif.', true);
+        }
+      });
+
+      el.btnForcePull.addEventListener('click', async () => {
+        if (!syncConfig.enabled) {
+          showSyncModalFeedback('Simpan & aktifkan konfigurasi Cloud terlebih dahulu.', true);
+          return;
+        }
+        const ok = await pullFromCloud(true, false);
+        if (ok) showSyncModalFeedback('Berhasil menarik data terbaru dari Cloud!', false);
+      });
+
+      el.btnDisableSync.addEventListener('click', () => {
+        syncConfig.enabled = false;
+        saveSyncConfig();
+        if (syncPollTimer) clearInterval(syncPollTimer);
+        showSyncModalFeedback('Auto-Sync dimatikan. Data kini hanya disimpan di browser perangkat ini.', false);
+      });
+
+      el.btnExportJson.addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify({ updatedAt: localUpdatedAt, transactions }, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `dompet-tayaa-backup-${getTodayISO()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('File backup .json berhasil diunduh!', '📥');
+      });
+
+      el.inputImportJson.addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+          try {
+            const parsed = JSON.parse(ev.target.result);
+            const list = Array.isArray(parsed) ? parsed : parsed.transactions;
+            if (!Array.isArray(list)) throw new Error('Format tidak valid');
+            transactions = list;
+            saveToStorage(true);
+            renderDashboard();
+            if (syncConfig.enabled) await pushToCloud(true);
+            closeSyncModal();
+            showToast(`${list.length} transaksi berhasil diimpor!`, '📤');
+          } catch (err) {
+            showSyncModalFeedback('File JSON tidak valid.', true);
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      window.addEventListener('focus', () => {
+        if (syncConfig.enabled) pullFromCloud(false, true);
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && syncConfig.enabled) pullFromCloud(false, true);
+      });
+
+      el.btnOpenResetModal.addEventListener('click', () => {
+        el.resetModal.classList.remove('hidden');
+        el.resetModal.classList.add('flex');
+      });
+
+      const closeResetModal = () => {
+        el.resetModal.classList.add('hidden');
+        el.resetModal.classList.remove('flex');
+      };
+
+      el.btnCancelReset.addEventListener('click', closeResetModal);
+      el.resetModal.addEventListener('click', (e) => {
+        if (e.target === el.resetModal) closeResetModal();
+      });
+
+      el.btnConfirmReset.addEventListener('click', async () => {
+        transactions = [];
+        saveToStorage(true);
+        if (syncConfig.enabled) {
+          await pushToCloud(true);
+        }
+        closeResetModal();
+        renderDashboard();
+        showToast('Seluruh data berhasil direset', '🧹');
+      });
+
+      loadFromStorage();
+      updateSyncHeaderIndicator();
+      renderDashboard();
+
+      if (syncConfig.enabled && syncConfig.endpoint && syncConfig.roomKey) {
+        pullFromCloud(false, true);
+        startAutoSyncTimer();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
