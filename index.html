@@ -229,7 +229,7 @@
           <div class="flex items-center justify-between mb-4">
             <div>
               <h2 class="text-base font-bold text-slate-900">Catat Keluar Masuk Dana</h2>
-              <p class="text-xs text-slate-500">Input cepat dan praktis</p>
+              <p class="text-xs text-slate-500">Input cepat, langsung sinkron otomatis di HP &amp; Laptop</p>
             </div>
             <span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600">Kilat ⚡</span>
           </div>
@@ -469,7 +469,7 @@
       </div>
 
       <p class="text-sm text-slate-600 leading-relaxed mb-6">
-        Seluruh catatan keluar masuk dana di Dompet Tayaa akan dikosongkan secara permanen. Yakin ingin mulai baru?
+        Seluruh catatan keluar masuk dana di Dompet Tayaa akan dikosongkan secara permanen di HP maupun Laptop. Yakin ingin mulai baru?
       </p>
 
       <div class="flex items-center justify-end gap-2.5">
@@ -495,12 +495,10 @@
   <script>
     /**
      * ============================================================================
-     * DOMPET TAYAA — KELUAR MASUK DANA
+     * DOMPET TAYAA — KELUAR MASUK DANA (TERHUBUNG OTOMATIS KE FIREBASE)
      * ============================================================================
-     * OPSIONAL: Jika ingin HP & Laptop auto-sinkron otomatis di belakang layar
-     * tanpa tombol menu apa pun, cukup isi URL Firebase Realtime Database Anda di bawah ini:
      */
-    const CLOUD_FIREBASE_URL = ''; // Contoh: 'https://dompet-tayaa-default-rtdb.asia-southeast1.firebasedatabase.app'
+    const CLOUD_FIREBASE_URL = 'https://dompet-taya-default-rtdb.asia-southeast1.firebasedatabase.app';
 
     const STORAGE_KEY = 'dompet_tayaa_transactions_v1';
     const STORAGE_META_KEY = 'dompet_tayaa_meta_v1';
@@ -522,7 +520,10 @@
 
     // State Aplikasi
     let transactions = [];
+    let deletedIds = [];
+    let lastResetAt = 0;
     let localUpdatedAt = 0;
+    let isSyncBusy = false;
     let activePeriodFilter = 'CURRENT_MONTH';
     let activeTypeFilter = 'ALL';
     let searchQuery = '';
@@ -650,7 +651,7 @@
     }
 
     // ============================================================================
-    // PENYIMPANAN LOCALSTORAGE & BACKGROUND SYNC (JIKA URL DIISI)
+    // PENYIMPANAN LOCALSTORAGE & REAL-TIME FIREBASE SMART MERGE SYNC
     // ============================================================================
 
     function loadFromStorage() {
@@ -662,6 +663,8 @@
         const metaRaw = localStorage.getItem(STORAGE_META_KEY);
         const meta = metaRaw ? JSON.parse(metaRaw) : {};
         localUpdatedAt = Number(meta.updatedAt) || 0;
+        deletedIds = Array.isArray(meta.deletedIds) ? meta.deletedIds : [];
+        lastResetAt = Number(meta.lastResetAt) || 0;
       } catch (err) {
         console.error('Gagal membaca LocalStorage:', err);
         transactions = [];
@@ -674,7 +677,11 @@
           localUpdatedAt = Date.now();
         }
         localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
-        localStorage.setItem(STORAGE_META_KEY, JSON.stringify({ updatedAt: localUpdatedAt }));
+        localStorage.setItem(STORAGE_META_KEY, JSON.stringify({
+          updatedAt: localUpdatedAt,
+          deletedIds: deletedIds.slice(-300),
+          lastResetAt
+        }));
       } catch (err) {
         console.error('Gagal menyimpan ke LocalStorage:', err);
       }
@@ -687,32 +694,91 @@
         await fetch(`${baseUrl}/dompet_tayaa_data.json`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ updatedAt: localUpdatedAt || Date.now(), transactions })
+          body: JSON.stringify({
+            updatedAt: localUpdatedAt || Date.now(),
+            lastResetAt,
+            deletedIds: deletedIds.slice(-300),
+            transactions
+          })
         });
-      } catch (e) {}
+      } catch (e) {
+        console.error('Push error:', e);
+      }
     }
 
-    async function pullFromCloudSilent() {
-      if (!CLOUD_FIREBASE_URL) return;
+    /**
+     * Menyinkronkan data dua arah secara otomatis antara HP & Laptop:
+     * Menggabungkan transaksi dari kedua perangkat berdasarkan ID unik tanpa saling menimpa.
+     */
+    async function syncWithCloud() {
+      if (!CLOUD_FIREBASE_URL || isSyncBusy) return;
+      isSyncBusy = true;
       try {
         const baseUrl = CLOUD_FIREBASE_URL.trim().replace(/\/+$/, '');
-        const res = await fetch(`${baseUrl}/dompet_tayaa_data.json`, { cache: 'no-store' });
-        if (!res.ok) return;
-        const remote = await res.json();
-        if (!remote || !Array.isArray(remote.transactions)) {
-          if (transactions.length > 0) await pushToCloudSilent();
+        const res = await fetch(`${baseUrl}/dompet_tayaa_data.json?_t=${Date.now()}`, { cache: 'no-store' });
+        if (!res.ok) {
+          isSyncBusy = false;
           return;
         }
-        const remoteUpdatedAt = Number(remote.updatedAt) || 0;
-        if (remoteUpdatedAt > localUpdatedAt) {
-          transactions = remote.transactions;
-          localUpdatedAt = remoteUpdatedAt;
+        const remote = await res.json();
+
+        // Jika Firebase masih kosong tapi di perangkat ini sudah ada transaksi, langsung unggah ke Firebase
+        if (!remote) {
+          if (transactions.length > 0 || lastResetAt > 0) {
+            await pushToCloudSilent();
+          }
+          isSyncBusy = false;
+          return;
+        }
+
+        const remoteTxs = Array.isArray(remote.transactions) ? remote.transactions : [];
+        const remoteDeleted = Array.isArray(remote.deletedIds) ? remote.deletedIds : [];
+        const remoteResetAt = Number(remote.lastResetAt) || 0;
+
+        const mergedDeletedSet = new Set([...deletedIds, ...remoteDeleted]);
+        const effectiveResetAt = Math.max(lastResetAt, remoteResetAt);
+
+        // Gabungkan transaksi dari Cloud & perangkat lokal
+        const txMap = new Map();
+        [...remoteTxs, ...transactions].forEach(tx => {
+          if (!tx || !tx.id) return;
+          if (mergedDeletedSet.has(tx.id)) return;
+          if (effectiveResetAt > 0 && (tx.createdAt || 0) <= effectiveResetAt) return;
+          txMap.set(tx.id, tx);
+        });
+
+        const mergedList = Array.from(txMap.values()).sort((a, b) => {
+          if (b.date !== a.date) return b.date.localeCompare(a.date);
+          return (b.createdAt || 0) - (a.createdAt || 0);
+        });
+
+        const localChanged =
+          JSON.stringify(mergedList) !== JSON.stringify(transactions) ||
+          effectiveResetAt !== lastResetAt ||
+          mergedDeletedSet.size !== deletedIds.length;
+
+        const remoteNeedsUpdate =
+          JSON.stringify(mergedList) !== JSON.stringify(remoteTxs) ||
+          effectiveResetAt !== remoteResetAt ||
+          mergedDeletedSet.size !== remoteDeleted.length;
+
+        transactions = mergedList;
+        deletedIds = Array.from(mergedDeletedSet);
+        lastResetAt = effectiveResetAt;
+
+        if (localChanged) {
           saveToStorage(false);
           renderDashboard();
-        } else if (localUpdatedAt > remoteUpdatedAt) {
+        }
+
+        if (remoteNeedsUpdate) {
           await pushToCloudSilent();
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error('Sync error:', e);
+      } finally {
+        isSyncBusy = false;
+      }
     }
 
     // ============================================================================
@@ -1252,17 +1318,18 @@
 
       renderDashboard();
       showToast(`${category} (${formatRupiah(amount)}) berhasil dicatat!`);
-      await pushToCloudSilent();
+      await syncWithCloud();
     }
 
     window.deleteTransaction = async function(id) {
       const target = transactions.find(t => t.id === id);
       if (!target) return;
+      deletedIds.push(id);
       transactions = transactions.filter(t => t.id !== id);
       saveToStorage(true);
       renderDashboard();
       showToast(`Transaksi ${formatRupiah(target.amount)} dihapus`, '🗑️');
-      await pushToCloudSilent();
+      await syncWithCloud();
     };
 
     // ============================================================================
@@ -1344,6 +1411,8 @@
 
       el.btnConfirmReset.addEventListener('click', async () => {
         transactions = [];
+        deletedIds = [];
+        lastResetAt = Date.now();
         saveToStorage(true);
         await pushToCloudSilent();
         closeResetModal();
@@ -1351,14 +1420,19 @@
         showToast('Seluruh data berhasil direset', '🧹');
       });
 
-      window.addEventListener('focus', pullFromCloudSilent);
+      window.addEventListener('focus', syncWithCloud);
       document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) pullFromCloudSilent();
+        if (!document.hidden) syncWithCloud();
       });
 
       loadFromStorage();
       renderDashboard();
-      pullFromCloudSilent();
+      syncWithCloud();
+
+      // Sinkronisasi otomatis setiap 3 detik di belakang layar
+      setInterval(() => {
+        if (!document.hidden) syncWithCloud();
+      }, 3000);
     }
 
     document.addEventListener('DOMContentLoaded', initApp);
