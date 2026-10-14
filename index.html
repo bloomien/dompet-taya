@@ -64,7 +64,7 @@
 
   <!-- ================= HEADER / NAVBAR ================= -->
   <header class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-3">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
       <!-- Brand Logo & Title -->
       <div class="flex items-center gap-3 min-w-0">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-600 to-indigo-700 flex items-center justify-center text-white shadow-sm shadow-brand-500/20 shrink-0">
@@ -73,55 +73,29 @@
           </svg>
         </div>
         <div class="min-w-0">
-          <div class="flex items-center gap-2">
-            <h1 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 truncate">Dompet Tayaa</h1>
-            <!-- Status Indikator Cloud Sync (Klik untuk mengatur sinkronisasi HP & Laptop) -->
-            <button id="btnHeaderSyncStatus" type="button"
-              class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600 hover:bg-brand-50 hover:text-brand-700 border border-slate-200 transition cursor-pointer">
-              <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
-              <span id="syncStatusText">Lokal (Setup Sync)</span>
-            </button>
-          </div>
-          <p class="text-[11px] sm:text-xs text-slate-500 truncate">Keluar Masuk Dana &bull; Auto-Sync HP &amp; Laptop</p>
+          <h1 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 truncate">Dompet Tayaa</h1>
+          <p class="text-[11px] sm:text-xs text-slate-500 truncate">Keluar Masuk Dana</p>
         </div>
       </div>
 
-      <!-- Filter Bulan & Aksi Cepat -->
-      <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+      <!-- Filter Bulan & Tombol Reset -->
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
         <!-- Pemilih Periode Bulan -->
-        <div class="flex items-center bg-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-200/70">
-          <label for="monthFilter" class="text-xs font-medium text-slate-500 mr-1.5 hidden md:inline">Periode:</label>
+        <div class="flex items-center bg-slate-100 rounded-xl px-3 py-1.5 border border-slate-200/70">
+          <label for="monthFilter" class="text-xs font-medium text-slate-500 mr-1.5 hidden sm:inline">Periode:</label>
           <select id="monthFilter" class="bg-transparent text-xs sm:text-sm font-semibold text-slate-700 focus:outline-none cursor-pointer">
             <option value="CURRENT_MONTH">Bulan Ini</option>
             <option value="ALL">Semua Waktu</option>
           </select>
         </div>
 
-        <!-- Tombol Cloud Sync (HP & Laptop) -->
-        <button id="btnOpenSyncModal" type="button" title="Pengaturan Auto-Sync HP & Laptop"
-          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
-          </svg>
-          <span class="hidden sm:inline">Sinkron HP &amp; Laptop</span>
-        </button>
-
-        <!-- Tombol Data Contoh -->
-        <button id="btnSampleData" type="button" title="Muat contoh transaksi"
-          class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200/80 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          <span class="hidden lg:inline">Data Contoh</span>
-        </button>
-
         <!-- Tombol Reset Data -->
         <button id="btnOpenResetModal" type="button" title="Reset Seluruh Data"
-          class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200/70 transition">
+          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200/70 transition">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
-          <span class="hidden md:inline">Reset</span>
+          <span>Reset</span>
         </button>
       </div>
     </div>
@@ -255,7 +229,7 @@
           <div class="flex items-center justify-between mb-4">
             <div>
               <h2 class="text-base font-bold text-slate-900">Catat Keluar Masuk Dana</h2>
-              <p class="text-xs text-slate-500">Input cepat, otomatis tersimpan &amp; tersinkron</p>
+              <p class="text-xs text-slate-500">Input cepat dan praktis</p>
             </div>
             <span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600">Kilat ⚡</span>
           </div>
@@ -465,7 +439,7 @@
             </div>
             <p class="text-sm font-bold text-slate-700">Belum ada riwayat transaksi</p>
             <p class="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
-              Gunakan formulir di sebelah kiri untuk mencatat dana masuk/keluar, atau hubungkan <strong>Sinkron HP &amp; Laptop</strong> di kanan atas.
+              Gunakan formulir di sebelah kiri untuk mencatat pemasukan atau pengeluaran pertama Anda.
             </p>
           </div>
         </section>
@@ -476,135 +450,8 @@
 
   <!-- ================= FOOTER ================= -->
   <footer class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-xs text-slate-400 border-t border-slate-200/60 mt-8">
-    <p>Dompet Tayaa — Keluar Masuk Dana &bull; Mendukung penyimpanan <code class="text-slate-500">localStorage</code> &amp; Cloud Auto-Sync (HP &leftrightarrow; Laptop).</p>
+    <p>Dompet Tayaa — Keluar Masuk Dana</p>
   </footer>
-
-  <!-- ================= MODAL CLOUD AUTO-SYNC (HP & LAPTOP) ================= -->
-  <div id="syncModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
-    <div class="bg-white rounded-2xl max-w-xl w-full p-5 sm:p-6 shadow-xl border border-slate-200 fade-in my-8">
-      <!-- Header Modal -->
-      <div class="flex items-start justify-between gap-3 pb-4 border-b border-slate-100">
-        <div class="flex items-center gap-3">
-          <div class="w-11 h-11 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
-            </svg>
-          </div>
-          <div>
-            <h3 class="text-base font-bold text-slate-900">Auto-Sync Dompet Tayaa (HP &amp; Laptop)</h3>
-            <p class="text-xs text-slate-500">Sinkronkan keluar masuk dana otomatis antar perangkat</p>
-          </div>
-        </div>
-        <button type="button" id="btnCloseSyncModal" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
-      <!-- Form Konfigurasi Cloud Sync -->
-      <div class="mt-4 space-y-4">
-        <!-- Pilihan Provider Cloud -->
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1.5">Metode Cloud Penyimpanan</label>
-          <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl border border-slate-200/70">
-            <button type="button" id="btnProviderFirebase" data-provider="firebase"
-              class="py-2 px-3 rounded-lg text-xs font-bold transition-all bg-white text-slate-900 shadow-sm">
-              🔥 Firebase Realtime DB
-            </button>
-            <button type="button" id="btnProviderGas" data-provider="gas"
-              class="py-2 px-3 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900">
-              📊 Google Sheets (Apps Script)
-            </button>
-          </div>
-          <input type="hidden" id="syncProviderInput" value="firebase" />
-        </div>
-
-        <!-- Input URL Endpoint Cloud -->
-        <div>
-          <label for="syncEndpointInput" id="labelSyncEndpoint" class="block text-xs font-semibold text-slate-600 mb-1">
-            URL Firebase Realtime Database
-          </label>
-          <input
-            type="url"
-            id="syncEndpointInput"
-            placeholder="https://dompet-tayaa-default-rtdb.asia-southeast1.firebasedatabase.app"
-            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white text-xs sm:text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition"
-          />
-          <p id="syncEndpointHelp" class="text-[11px] text-slate-400 mt-1">
-            Masukkan URL yang sama di HP dan di Laptop Anda.
-          </p>
-        </div>
-
-        <!-- Input Kode / PIN Sinkronisasi -->
-        <div>
-          <label for="syncRoomKeyInput" class="block text-xs font-semibold text-slate-600 mb-1">
-            Kode / PIN Sinkronisasi Pribadi (Bebas &amp; Unik)
-          </label>
-          <input
-            type="text"
-            id="syncRoomKeyInput"
-            placeholder="Contoh: tayaa-2026"
-            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white text-xs sm:text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition"
-          />
-          <p class="text-[11px] text-slate-400 mt-1">
-            Gunakan kode rahasia yang sama di HP dan Laptop agar kedua perangkat membaca data yang sama.
-          </p>
-        </div>
-
-        <!-- Kotak Panduan Setup Cepat (1 Menit) -->
-        <div class="rounded-xl bg-slate-50 border border-slate-200/80 p-3.5 text-xs space-y-2">
-          <div class="flex items-center justify-between">
-            <span id="guideTitle" class="font-bold text-slate-700">💡 Cara Dapat URL Firebase Gratis (1 Menit):</span>
-            <button type="button" id="btnCopyGasScript" class="hidden text-[11px] font-bold px-2.5 py-1 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition">
-              Salin Kode Apps Script
-            </button>
-          </div>
-          <ol id="guideStepsList" class="list-decimal list-inside space-y-1 text-slate-600 text-[11px] leading-relaxed">
-            <li>Buka <strong>console.firebase.google.com</strong> &rarr; klik <strong>Create a project</strong>.</li>
-            <li>Di menu kiri pilih <strong>Build &rarr; Realtime Database &rarr; Create Database</strong>.</li>
-            <li>Pilih lokasi server &rarr; pilih <strong>Start in test mode</strong> &rarr; salin link URL database (`https://...firebasedatabase.app`) ke kolom di atas.</li>
-          </ol>
-        </div>
-
-        <!-- Status & Pesan Sinkronisasi -->
-        <div id="syncModalFeedback" class="hidden rounded-xl px-3.5 py-2.5 text-xs font-semibold"></div>
-
-        <!-- Tombol Simpan & Sinkronkan Sekarang -->
-        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
-          <div class="flex items-center gap-2">
-            <button type="button" id="btnDisableSync"
-              class="px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 transition">
-              Matikan Sync
-            </button>
-            <button type="button" id="btnForcePull"
-              class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">
-              ⬇️ Tarik Data Cloud
-            </button>
-          </div>
-
-          <button type="button" id="btnSaveAndSync"
-            class="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 shadow-sm shadow-brand-500/20 transition flex items-center gap-1.5">
-            <span>☁️ Simpan &amp; Aktifkan Auto-Sync</span>
-          </button>
-        </div>
-
-        <!-- Cadangan Manual: Export / Import File JSON -->
-        <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
-          <span class="text-slate-500 font-medium">Pindah data manual (tanpa internet/cloud):</span>
-          <div class="flex items-center gap-2">
-            <button type="button" id="btnExportJson" class="px-2.5 py-1.5 rounded-lg font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
-              📥 Export File (.json)
-            </button>
-            <label class="px-2.5 py-1.5 rounded-lg font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
-              📤 Import File (.json)
-              <input type="file" id="inputImportJson" accept=".json,application/json" class="hidden" />
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- ================= MODAL KONFIRMASI RESET DATA ================= -->
   <div id="resetModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
@@ -622,7 +469,7 @@
       </div>
 
       <p class="text-sm text-slate-600 leading-relaxed mb-6">
-        Seluruh catatan keluar masuk dana di Dompet Tayaa (serta di Cloud jika Auto-Sync aktif) akan dikosongkan. Yakin ingin mulai baru?
+        Seluruh catatan keluar masuk dana di Dompet Tayaa akan dikosongkan secara permanen. Yakin ingin mulai baru?
       </p>
 
       <div class="flex items-center justify-end gap-2.5">
@@ -648,70 +495,18 @@
   <script>
     /**
      * ============================================================================
-     * DOMPET TAYAA — KELUAR MASUK DANA (SINGLE-FILE VANILLA JS + CLOUD AUTO-SYNC)
+     * DOMPET TAYAA — KELUAR MASUK DANA
      * ============================================================================
-     * Fitur Utama:
-     * 1. Penyimpanan otomatis ke localStorage ('dompet_tayaa_transactions_v1').
-     * 2. Cloud Auto-Sync dua arah (HP <-> Laptop) via Firebase Realtime DB / Google Sheets.
-     * 3. Kategori Pengeluaran mencakup: Kebutuhan Pokok, Jajan/Hiburan, Tagihan,
-     *    Nabung, Investasi, dan Lainnya.
-     * 4. Perhitungan Cerdas: Alokasi "Nabung" & "Investasi" tercatat sebagai dana keluar
-     *    dari kas aktif, namun dihitung sebagai tabungan/aset produktif pada Rasio Tabungan
-     *    & Indikator Kesehatan Keuangan (bukan pengeluaran konsumtif).
+     * OPSIONAL: Jika ingin HP & Laptop auto-sinkron otomatis di belakang layar
+     * tanpa tombol menu apa pun, cukup isi URL Firebase Realtime Database Anda di bawah ini:
      */
+    const CLOUD_FIREBASE_URL = ''; // Contoh: 'https://dompet-tayaa-default-rtdb.asia-southeast1.firebasedatabase.app'
 
     const STORAGE_KEY = 'dompet_tayaa_transactions_v1';
     const STORAGE_META_KEY = 'dompet_tayaa_meta_v1';
-    const SYNC_CONFIG_KEY = 'dompet_tayaa_sync_config_v1';
 
     // Kategori produktif (Tabungan & Investasi) di dalam Pengeluaran
     const PRODUCTIVE_SAVING_CATEGORIES = ['Nabung', 'Investasi'];
-
-    // Template Kode Google Apps Script (Menyimpan ke Cloud + Menampilkan Tabel Rapi di Google Sheets)
-    const GAS_SCRIPT_TEMPLATE = `// Tempel kode ini di Google Sheets -> Ekstensi -> Apps Script
-// Lalu klik Terapkan (Deploy) -> Deployment baru -> Aplikasi Web (Akses: Siapa saja)
-
-function doGet(e) {
-  var key = (e.parameter && e.parameter.key) || 'default';
-  var props = PropertiesService.getScriptProperties();
-  var raw = props.getProperty('DOMPET_TAYAA_' + key);
-  var out = raw ? raw : JSON.stringify({ updatedAt: 0, transactions: [] });
-  return ContentService.createTextOutput(out).setMimeType(ContentService.MimeType.JSON);
-}
-
-function doPost(e) {
-  var body = JSON.parse(e.postData.contents);
-  var key = body.key || 'default';
-  var txs = body.transactions || [];
-  var payload = { updatedAt: body.updatedAt || Date.now(), transactions: txs };
-
-  // 1. Simpan JSON untuk Auto-Sync cepat antara HP & Laptop
-  PropertiesService.getScriptProperties().setProperty('DOMPET_TAYAA_' + key, JSON.stringify(payload));
-
-  // 2. Tulis juga ke tabel Google Sheets secara otomatis agar mudah direkap
-  try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    if (ss) {
-      var sheet = ss.getSheetByName('Dompet Tayaa') || ss.insertSheet('Dompet Tayaa');
-      sheet.clearContents();
-      sheet.appendRow(['Tanggal', 'Tipe', 'Kategori', 'Nominal (Rp)', 'Catatan / Deskripsi', 'ID Transaksi']);
-      for (var i = 0; i < txs.length; i++) {
-        var t = txs[i];
-        sheet.appendRow([
-          t.date || '',
-          t.type === 'income' ? 'Pemasukan (+)' : 'Pengeluaran (-)',
-          t.category || '',
-          Number(t.amount) || 0,
-          t.description || '-',
-          t.id || ''
-        ]);
-      }
-    }
-  } catch (err) {}
-
-  return ContentService.createTextOutput(JSON.stringify({ status: 'ok', updatedAt: payload.updatedAt }))
-    .setMimeType(ContentService.MimeType.JSON);
-}`;
 
     // Konfigurasi Metadata Kategori (Ikon & Warna Chart)
     const CATEGORY_META = {
@@ -728,15 +523,6 @@ function doPost(e) {
     // State Aplikasi
     let transactions = [];
     let localUpdatedAt = 0;
-    let syncConfig = {
-      enabled: false,
-      provider: 'firebase', // 'firebase' | 'gas'
-      endpoint: '',
-      roomKey: ''
-    };
-    let isSyncing = false;
-    let syncPollTimer = null;
-
     let activePeriodFilter = 'CURRENT_MONTH';
     let activeTypeFilter = 'ALL';
     let searchQuery = '';
@@ -746,34 +532,7 @@ function doPost(e) {
     // Referensi Elemen DOM
     const el = {
       monthFilter: document.getElementById('monthFilter'),
-      btnSampleData: document.getElementById('btnSampleData'),
       btnOpenResetModal: document.getElementById('btnOpenResetModal'),
-
-      // Header Cloud Sync Controls
-      btnHeaderSyncStatus: document.getElementById('btnHeaderSyncStatus'),
-      syncStatusDot: document.getElementById('syncStatusDot'),
-      syncStatusText: document.getElementById('syncStatusText'),
-      btnOpenSyncModal: document.getElementById('btnOpenSyncModal'),
-
-      // Modal Cloud Sync
-      syncModal: document.getElementById('syncModal'),
-      btnCloseSyncModal: document.getElementById('btnCloseSyncModal'),
-      btnProviderFirebase: document.getElementById('btnProviderFirebase'),
-      btnProviderGas: document.getElementById('btnProviderGas'),
-      syncProviderInput: document.getElementById('syncProviderInput'),
-      labelSyncEndpoint: document.getElementById('labelSyncEndpoint'),
-      syncEndpointInput: document.getElementById('syncEndpointInput'),
-      syncEndpointHelp: document.getElementById('syncEndpointHelp'),
-      syncRoomKeyInput: document.getElementById('syncRoomKeyInput'),
-      guideTitle: document.getElementById('guideTitle'),
-      guideStepsList: document.getElementById('guideStepsList'),
-      btnCopyGasScript: document.getElementById('btnCopyGasScript'),
-      syncModalFeedback: document.getElementById('syncModalFeedback'),
-      btnDisableSync: document.getElementById('btnDisableSync'),
-      btnForcePull: document.getElementById('btnForcePull'),
-      btnSaveAndSync: document.getElementById('btnSaveAndSync'),
-      btnExportJson: document.getElementById('btnExportJson'),
-      inputImportJson: document.getElementById('inputImportJson'),
 
       // Health Banner
       healthBanner: document.getElementById('healthBanner'),
@@ -891,12 +650,11 @@ function doPost(e) {
     }
 
     // ============================================================================
-    // PENYIMPANAN LOCALSTORAGE & CLOUD AUTO-SYNC ENGINE
+    // PENYIMPANAN LOCALSTORAGE & BACKGROUND SYNC (JIKA URL DIISI)
     // ============================================================================
 
     function loadFromStorage() {
       try {
-        // Fallback baca data lama jika pengguna pernah pakai versi sebelumnya
         const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('dompetku_transactions_v1');
         transactions = raw ? JSON.parse(raw) : [];
         if (!Array.isArray(transactions)) transactions = [];
@@ -904,11 +662,6 @@ function doPost(e) {
         const metaRaw = localStorage.getItem(STORAGE_META_KEY);
         const meta = metaRaw ? JSON.parse(metaRaw) : {};
         localUpdatedAt = Number(meta.updatedAt) || 0;
-
-        const syncRaw = localStorage.getItem(SYNC_CONFIG_KEY);
-        if (syncRaw) {
-          syncConfig = { ...syncConfig, ...JSON.parse(syncRaw) };
-        }
       } catch (err) {
         console.error('Gagal membaca LocalStorage:', err);
         transactions = [];
@@ -927,141 +680,39 @@ function doPost(e) {
       }
     }
 
-    function saveSyncConfig() {
-      localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(syncConfig));
-      updateSyncHeaderIndicator();
-    }
-
-    function updateSyncHeaderIndicator(state = null) {
-      if (!syncConfig.enabled || !syncConfig.endpoint || !syncConfig.roomKey) {
-        el.syncStatusDot.className = 'w-2 h-2 rounded-full bg-slate-400';
-        el.syncStatusText.textContent = 'Lokal (Klik untuk Sync)';
-        return;
-      }
-
-      if (state === 'syncing') {
-        el.syncStatusDot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-pulse';
-        el.syncStatusText.textContent = 'Menyinkronkan...';
-      } else if (state === 'error') {
-        el.syncStatusDot.className = 'w-2 h-2 rounded-full bg-rose-500';
-        el.syncStatusText.textContent = 'Sync Gagal (Cek URL)';
-      } else {
-        el.syncStatusDot.className = 'w-2 h-2 rounded-full bg-emerald-500';
-        el.syncStatusText.textContent = `Auto-Sync: ${syncConfig.roomKey}`;
-      }
-    }
-
-    /** Mengirim (Push) data transaksi saat ini ke Cloud */
-    async function pushToCloud(silent = true) {
-      if (!syncConfig.enabled || !syncConfig.endpoint || !syncConfig.roomKey) return false;
-      isSyncing = true;
-      updateSyncHeaderIndicator('syncing');
-
+    async function pushToCloudSilent() {
+      if (!CLOUD_FIREBASE_URL) return;
       try {
-        const cleanKey = syncConfig.roomKey.trim().replace(/[^a-zA-Z0-9_-]/g, '_');
-        const payload = {
-          updatedAt: localUpdatedAt || Date.now(),
-          transactions: transactions
-        };
-
-        if (syncConfig.provider === 'firebase') {
-          const baseUrl = syncConfig.endpoint.trim().replace(/\/+$/, '');
-          const url = `${baseUrl}/dompet_tayaa_sync/${encodeURIComponent(cleanKey)}.json`;
-          const res = await fetch(url, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        } else {
-          const res = await fetch(syncConfig.endpoint.trim(), {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ key: cleanKey, ...payload })
-          });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        }
-
-        isSyncing = false;
-        updateSyncHeaderIndicator('ok');
-        if (!silent) showToast('Data berhasil disinkronkan ke Cloud!', '☁️');
-        return true;
-      } catch (err) {
-        console.error('Push Cloud gagal:', err);
-        isSyncing = false;
-        updateSyncHeaderIndicator('error');
-        if (!silent) showToast('Gagal mengirim ke Cloud. Periksa URL/koneksi.', '⚠️');
-        return false;
-      }
+        const baseUrl = CLOUD_FIREBASE_URL.trim().replace(/\/+$/, '');
+        await fetch(`${baseUrl}/dompet_tayaa_data.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ updatedAt: localUpdatedAt || Date.now(), transactions })
+        });
+      } catch (e) {}
     }
 
-    /** Menarik (Pull) data dari Cloud dan menyinkronkannya dengan perangkat lokal */
-    async function pullFromCloud(forceOverwriteLocal = false, silent = true) {
-      if (!syncConfig.enabled || !syncConfig.endpoint || !syncConfig.roomKey || isSyncing) return false;
-      isSyncing = true;
-      updateSyncHeaderIndicator('syncing');
-
+    async function pullFromCloudSilent() {
+      if (!CLOUD_FIREBASE_URL) return;
       try {
-        const cleanKey = syncConfig.roomKey.trim().replace(/[^a-zA-Z0-9_-]/g, '_');
-        let remoteData = null;
-
-        if (syncConfig.provider === 'firebase') {
-          const baseUrl = syncConfig.endpoint.trim().replace(/\/+$/, '');
-          const url = `${baseUrl}/dompet_tayaa_sync/${encodeURIComponent(cleanKey)}.json`;
-          const res = await fetch(url, { cache: 'no-store' });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          remoteData = await res.json();
-        } else {
-          const sep = syncConfig.endpoint.includes('?') ? '&' : '?';
-          const url = `${syncConfig.endpoint.trim()}${sep}key=${encodeURIComponent(cleanKey)}&_t=${Date.now()}`;
-          const res = await fetch(url, { cache: 'no-store' });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          remoteData = await res.json();
+        const baseUrl = CLOUD_FIREBASE_URL.trim().replace(/\/+$/, '');
+        const res = await fetch(`${baseUrl}/dompet_tayaa_data.json`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const remote = await res.json();
+        if (!remote || !Array.isArray(remote.transactions)) {
+          if (transactions.length > 0) await pushToCloudSilent();
+          return;
         }
-
-        isSyncing = false;
-
-        if (!remoteData || !Array.isArray(remoteData.transactions)) {
-          if (transactions.length > 0) {
-            await pushToCloud(true);
-          } else {
-            updateSyncHeaderIndicator('ok');
-          }
-          return true;
-        }
-
-        const remoteUpdatedAt = Number(remoteData.updatedAt) || 0;
-
-        if (forceOverwriteLocal || remoteUpdatedAt > localUpdatedAt) {
-          transactions = remoteData.transactions;
-          localUpdatedAt = remoteUpdatedAt || Date.now();
+        const remoteUpdatedAt = Number(remote.updatedAt) || 0;
+        if (remoteUpdatedAt > localUpdatedAt) {
+          transactions = remote.transactions;
+          localUpdatedAt = remoteUpdatedAt;
           saveToStorage(false);
           renderDashboard();
-          if (!silent) showToast('Data terbaru dari Cloud berhasil dimuat!', '☁️');
         } else if (localUpdatedAt > remoteUpdatedAt) {
-          await pushToCloud(true);
+          await pushToCloudSilent();
         }
-
-        updateSyncHeaderIndicator('ok');
-        return true;
-      } catch (err) {
-        console.error('Pull Cloud gagal:', err);
-        isSyncing = false;
-        updateSyncHeaderIndicator('error');
-        if (!silent) showToast('Gagal menarik data Cloud. Pastikan URL benar.', '⚠️');
-        return false;
-      }
-    }
-
-    function startAutoSyncTimer() {
-      if (syncPollTimer) clearInterval(syncPollTimer);
-      if (syncConfig.enabled && syncConfig.endpoint && syncConfig.roomKey) {
-        syncPollTimer = setInterval(() => {
-          if (!document.hidden) {
-            pullFromCloud(false, true);
-          }
-        }, 20000);
-      }
+      } catch (e) {}
     }
 
     // ============================================================================
@@ -1133,11 +784,6 @@ function doPost(e) {
     // LOGIKA INDIKATOR PERINGATAN KEUANGAN (HEALTH CHECKS / FLAGS)
     // ============================================================================
 
-    /**
-     * Mengevaluasi kesehatan keuangan:
-     * - Pengeluaran konsumtif/rutin (di luar Nabung & Investasi) digunakan untuk menguji Red Flag (>85%).
-     * - Alokasi ke Nabung & Investasi diapresiasi sebagai aset/tabungan produktif.
-     */
     function evaluateFinancialHealth(periodIncome, periodTotalOutflow, consumptionExpense, savingInvestOutflow, jajanExpense, totalBalance) {
       const dimClass = 'flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition opacity-40 bg-slate-50 border-slate-200 text-slate-500';
       el.lampHealthy.className = dimClass;
@@ -1157,9 +803,7 @@ function doPost(e) {
         return;
       }
 
-      // Rasio pengeluaran konsumsi terhadap pemasukan
       const consumptionRatio = periodIncome > 0 ? (consumptionExpense / periodIncome) * 100 : (consumptionExpense > 0 ? 100 : 0);
-      // Persentase Jajan/Hiburan terhadap pengeluaran konsumsi
       const jajanRatioOfExpense = consumptionExpense > 0 ? (jajanExpense / consumptionExpense) * 100 : 0;
 
       const isDeficit = periodTotalOutflow > periodIncome;
@@ -1517,7 +1161,6 @@ function doPost(e) {
         ? `Konsumsi ${formatRupiah(consumptionExpense)} • Nabung/Inv ${formatRupiah(savingInvestOutflow)}`
         : `${expenseCount} transaksi pengeluaran`;
 
-      // Kalkulasi Rasio Tabungan / Surplus: (Sisa Kas + Nabung + Investasi) / Pemasukan
       const totalSecuredAmount = (periodIncome - periodTotalOutflow) + savingInvestOutflow;
       let savingsRatio = 0;
       let consumptionRatio = 0;
@@ -1565,7 +1208,7 @@ function doPost(e) {
     }
 
     // ============================================================================
-    // AKSI CRUD TRANSAKSI (TAMBAH, HAPUS, SAMPLE DATA, RESET)
+    // AKSI CRUD TRANSAKSI (TAMBAH, HAPUS, RESET)
     // ============================================================================
 
     async function handleAddTransaction(event) {
@@ -1609,10 +1252,7 @@ function doPost(e) {
 
       renderDashboard();
       showToast(`${category} (${formatRupiah(amount)}) berhasil dicatat!`);
-
-      if (syncConfig.enabled) {
-        await pushToCloud(true);
-      }
+      await pushToCloudSilent();
     }
 
     window.deleteTransaction = async function(id) {
@@ -1622,97 +1262,8 @@ function doPost(e) {
       saveToStorage(true);
       renderDashboard();
       showToast(`Transaksi ${formatRupiah(target.amount)} dihapus`, '🗑️');
-
-      if (syncConfig.enabled) {
-        await pushToCloud(true);
-      }
+      await pushToCloudSilent();
     };
-
-    async function loadSampleData() {
-      const ym = getCurrentYearMonth();
-      const sampleItems = [
-        { type: 'income',  amount: 8500000, category: 'Gaji',             description: 'Gaji bulanan',                   date: `${ym}-01` },
-        { type: 'income',  amount: 1500000, category: 'Bisnis/Sampingan', description: 'Bonus projek freelance',         date: `${ym}-05` },
-        { type: 'expense', amount: 2000000, category: 'Kebutuhan Pokok',  description: 'Belanja bulanan & makan harian', date: `${ym}-03` },
-        { type: 'expense', amount: 1500000, category: 'Nabung',           description: 'Tabungan dana darurat',          date: `${ym}-04` },
-        { type: 'expense', amount: 1000000, category: 'Investasi',        description: 'Beli Reksadana & Emas',          date: `${ym}-05` },
-        { type: 'expense', amount: 850000,  category: 'Tagihan',          description: 'Listrik, kuota internet & air',  date: `${ym}-07` },
-        { type: 'expense', amount: 650000,  category: 'Jajan/Hiburan',    description: 'Kopi, kuliner akhir pekan',      date: `${ym}-10` }
-      ];
-
-      const now = Date.now();
-      sampleItems.forEach((item, idx) => {
-        transactions.push({
-          id: 'sample_' + now + '_' + idx,
-          ...item,
-          createdAt: now + idx
-        });
-      });
-
-      activePeriodFilter = 'CURRENT_MONTH';
-      saveToStorage(true);
-      renderDashboard();
-      showToast('7 transaksi contoh (termasuk Nabung & Investasi) dimuat!', '⚡');
-
-      if (syncConfig.enabled) {
-        await pushToCloud(true);
-      }
-    }
-
-    // ============================================================================
-    // PENGATURAN UI MODAL CLOUD SYNC
-    // ============================================================================
-
-    function setSyncProviderUI(provider) {
-      el.syncProviderInput.value = provider;
-      if (provider === 'gas') {
-        el.btnProviderGas.className = 'py-2 px-3 rounded-lg text-xs font-bold transition-all bg-white text-slate-900 shadow-sm';
-        el.btnProviderFirebase.className = 'py-2 px-3 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900';
-        el.labelSyncEndpoint.textContent = 'URL Web App Google Apps Script';
-        el.syncEndpointInput.placeholder = 'https://script.google.com/macros/s/AKfycb.../exec';
-        el.guideTitle.textContent = '💡 Cara Pakai Google Sheets + Apps Script Gratis:';
-        el.btnCopyGasScript.classList.remove('hidden');
-        el.guideStepsList.innerHTML = `
-          <li>Klik tombol <strong>Salin Kode Apps Script</strong> di kanan atas kotak ini.</li>
-          <li>Buka <strong>Google Sheets</strong> baru &rarr; menu <strong>Ekstensi &rarr; Apps Script</strong> &rarr; tempel kode &rarr; klik <strong>Terapkan (Deploy) &rarr; Deployment baru</strong>.</li>
-          <li>Pilih jenis <strong>Aplikasi Web</strong>, akses: <strong>Siapa saja (Anyone)</strong>, lalu salin URL Web App ke kolom di atas.</li>
-        `;
-      } else {
-        el.btnProviderFirebase.className = 'py-2 px-3 rounded-lg text-xs font-bold transition-all bg-white text-slate-900 shadow-sm';
-        el.btnProviderGas.className = 'py-2 px-3 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900';
-        el.labelSyncEndpoint.textContent = 'URL Firebase Realtime Database';
-        el.syncEndpointInput.placeholder = 'https://dompet-tayaa-default-rtdb.asia-southeast1.firebasedatabase.app';
-        el.guideTitle.textContent = '💡 Cara Dapat URL Firebase Gratis (1 Menit):';
-        el.btnCopyGasScript.classList.add('hidden');
-        el.guideStepsList.innerHTML = `
-          <li>Buka <strong>console.firebase.google.com</strong> &rarr; klik <strong>Create a project</strong>.</li>
-          <li>Di menu kiri pilih <strong>Build &rarr; Realtime Database &rarr; Create Database</strong>.</li>
-          <li>Pilih <strong>Start in test mode</strong> &rarr; salin link URL database (<code>https://...firebasedatabase.app</code>) ke kolom di atas.</li>
-        `;
-      }
-    }
-
-    function openSyncModal() {
-      setSyncProviderUI(syncConfig.provider || 'firebase');
-      el.syncEndpointInput.value = syncConfig.endpoint || '';
-      el.syncRoomKeyInput.value = syncConfig.roomKey || '';
-      el.syncModalFeedback.classList.add('hidden');
-      el.syncModal.classList.remove('hidden');
-      el.syncModal.classList.add('flex');
-    }
-
-    function closeSyncModal() {
-      el.syncModal.classList.add('hidden');
-      el.syncModal.classList.remove('flex');
-    }
-
-    function showSyncModalFeedback(msg, isError = false) {
-      el.syncModalFeedback.textContent = msg;
-      el.syncModalFeedback.className = `rounded-xl px-3.5 py-2.5 text-xs font-semibold ${
-        isError ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-      }`;
-      el.syncModalFeedback.classList.remove('hidden');
-    }
 
     // ============================================================================
     // INISIALISASI EVENT LISTENERS
@@ -1744,7 +1295,6 @@ function doPost(e) {
         });
       });
 
-      // Otomatis sesuaikan toggle Tipe saat memilih Kategori
       el.inputCategory.addEventListener('change', () => {
         const cat = el.inputCategory.value;
         if (['Gaji', 'Bisnis/Sampingan'].includes(cat)) {
@@ -1777,107 +1327,6 @@ function doPost(e) {
         renderTransactionTable(getPeriodTransactions());
       });
 
-      el.btnSampleData.addEventListener('click', loadSampleData);
-
-      el.btnOpenSyncModal.addEventListener('click', openSyncModal);
-      el.btnHeaderSyncStatus.addEventListener('click', openSyncModal);
-      el.btnCloseSyncModal.addEventListener('click', closeSyncModal);
-      el.syncModal.addEventListener('click', (e) => {
-        if (e.target === el.syncModal) closeSyncModal();
-      });
-
-      el.btnProviderFirebase.addEventListener('click', () => setSyncProviderUI('firebase'));
-      el.btnProviderGas.addEventListener('click', () => setSyncProviderUI('gas'));
-
-      el.btnCopyGasScript.addEventListener('click', () => {
-        navigator.clipboard.writeText(GAS_SCRIPT_TEMPLATE).then(() => {
-          showToast('Kode Google Apps Script disalin ke clipboard!', '📋');
-        });
-      });
-
-      el.btnSaveAndSync.addEventListener('click', async () => {
-        const provider = el.syncProviderInput.value;
-        const endpoint = el.syncEndpointInput.value.trim();
-        const roomKey = el.syncRoomKeyInput.value.trim();
-
-        if (!endpoint || !endpoint.startsWith('https://')) {
-          showSyncModalFeedback('Masukkan URL Cloud yang valid (diawali https://).', true);
-          return;
-        }
-        if (!roomKey) {
-          showSyncModalFeedback('Masukkan Kode / PIN Sinkronisasi terlebih dahulu.', true);
-          return;
-        }
-
-        syncConfig = { enabled: true, provider, endpoint, roomKey };
-        saveSyncConfig();
-        showSyncModalFeedback('Menghubungkan & menyinkronkan data dengan Cloud...', false);
-
-        const ok = await pullFromCloud(false, false);
-        if (ok) {
-          startAutoSyncTimer();
-          showSyncModalFeedback('✅ Auto-Sync Aktif! Gunakan URL & Kode yang sama di HP dan Laptop Anda.', false);
-        } else {
-          showSyncModalFeedback('Gagal terhubung ke URL Cloud tersebut. Pastikan URL benar & akses publik/test mode aktif.', true);
-        }
-      });
-
-      el.btnForcePull.addEventListener('click', async () => {
-        if (!syncConfig.enabled) {
-          showSyncModalFeedback('Simpan & aktifkan konfigurasi Cloud terlebih dahulu.', true);
-          return;
-        }
-        const ok = await pullFromCloud(true, false);
-        if (ok) showSyncModalFeedback('Berhasil menarik data terbaru dari Cloud!', false);
-      });
-
-      el.btnDisableSync.addEventListener('click', () => {
-        syncConfig.enabled = false;
-        saveSyncConfig();
-        if (syncPollTimer) clearInterval(syncPollTimer);
-        showSyncModalFeedback('Auto-Sync dimatikan. Data kini hanya disimpan di browser perangkat ini.', false);
-      });
-
-      el.btnExportJson.addEventListener('click', () => {
-        const blob = new Blob([JSON.stringify({ updatedAt: localUpdatedAt, transactions }, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `dompet-tayaa-backup-${getTodayISO()}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        showToast('File backup .json berhasil diunduh!', '📥');
-      });
-
-      el.inputImportJson.addEventListener('change', (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = async (ev) => {
-          try {
-            const parsed = JSON.parse(ev.target.result);
-            const list = Array.isArray(parsed) ? parsed : parsed.transactions;
-            if (!Array.isArray(list)) throw new Error('Format tidak valid');
-            transactions = list;
-            saveToStorage(true);
-            renderDashboard();
-            if (syncConfig.enabled) await pushToCloud(true);
-            closeSyncModal();
-            showToast(`${list.length} transaksi berhasil diimpor!`, '📤');
-          } catch (err) {
-            showSyncModalFeedback('File JSON tidak valid.', true);
-          }
-        };
-        reader.readAsText(file);
-      });
-
-      window.addEventListener('focus', () => {
-        if (syncConfig.enabled) pullFromCloud(false, true);
-      });
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden && syncConfig.enabled) pullFromCloud(false, true);
-      });
-
       el.btnOpenResetModal.addEventListener('click', () => {
         el.resetModal.classList.remove('hidden');
         el.resetModal.classList.add('flex');
@@ -1896,22 +1345,20 @@ function doPost(e) {
       el.btnConfirmReset.addEventListener('click', async () => {
         transactions = [];
         saveToStorage(true);
-        if (syncConfig.enabled) {
-          await pushToCloud(true);
-        }
+        await pushToCloudSilent();
         closeResetModal();
         renderDashboard();
         showToast('Seluruh data berhasil direset', '🧹');
       });
 
-      loadFromStorage();
-      updateSyncHeaderIndicator();
-      renderDashboard();
+      window.addEventListener('focus', pullFromCloudSilent);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) pullFromCloudSilent();
+      });
 
-      if (syncConfig.enabled && syncConfig.endpoint && syncConfig.roomKey) {
-        pullFromCloud(false, true);
-        startAutoSyncTimer();
-      }
+      loadFromStorage();
+      renderDashboard();
+      pullFromCloudSilent();
     }
 
     document.addEventListener('DOMContentLoaded', initApp);
